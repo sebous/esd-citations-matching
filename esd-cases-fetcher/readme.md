@@ -1,9 +1,8 @@
 ## scraper
   
 ### spiders implemented
-- esd_spider
+- esd_spider -> for scraping data from https://curia.europa.eu/
 
 ### running scraper
 - have scrapy package installed
-- `cd` into scraper directory
-- run `scrapy crawl {spider_name} -O data.json`
+- run scrape.py
