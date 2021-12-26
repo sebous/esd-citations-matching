@@ -14,6 +14,7 @@ fn setup_logging() -> Result<(), SetLoggerError> {
     Ok(())
 }
 
+/// initialize app
 pub fn init() {
     setup_logging().unwrap();
     info!("app initialized")
