@@ -1,3 +1,3 @@
-import db
+from db import db
 
-c = db.init("../db/db.sqlite")
+db.init()
