@@ -6,16 +6,31 @@ import peewee
 db = peewee.SqliteDatabase("../db/db.sqlite")
 
 
-class EsdCases(peewee.Model):
-    full_name = peewee.CharField(null=True)
-    short_name = peewee.CharField(null=True)
-    code = peewee.CharField(null=True)
-
+class BaseModel(peewee.Model):
     class Meta:
         database = db
 
 
-models = [EsdCases]
+class EsdCases_Fulltext(BaseModel):
+    text = peewee.CharField()
+    date = peewee.DateField(null=True)
+
+
+class EsdCases_Code(BaseModel):
+    short_name = peewee.CharField(null=True)
+    code = peewee.CharField(null=True)
+    date = peewee.DateField(null=True)
+
+
+class Matches(BaseModel):
+    source_case = peewee.CharField()
+    matched_case_fulltext = peewee.ForeignKeyField(
+        EsdCases_Fulltext, backref="matches", null=True)
+    matched_case_code = peewee.ForeignKeyField(
+        EsdCases_Code, backref="matches", null=True)
+
+
+models = [EsdCases_Fulltext, EsdCases_Code, Matches]
 
 
 def init():
