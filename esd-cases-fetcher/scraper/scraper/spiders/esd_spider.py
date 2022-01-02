@@ -6,7 +6,7 @@ class EsdSpider(scrapy.Spider):
     name = "esd"
     # must be cz version
     start_urls = [
-        "https://curia.europa.eu/juris/documents.jsf?page=1&oqp=&for=&mat=or&lgrec=cs&jge=&td=%24mode%3D1Y%24from%3D2020.12.19%24to%3D2021.12.19%3B%3B%3BPUB1%2CPUB2%3B%3B%3B%3BORDALL&jur=C%2CT%2CF&dates=&pcs=Oor&lg=&pro=&nat=or&cit=none%252CC%252CCJ%252CR%252C2008E%252C%252C%252C%252C%252C%252C%252C%252C%252C%252Ctrue%252Cfalse%252Cfalse&language=cs&avg=&cid=587460"
+        "https://curia.europa.eu/juris/documents.jsf?oqp=&for=&mat=or&lgrec=cs&jge=&td=%24mode%3DfromTo%24from%3D1952.01.01%24to%3D2018.12.31%3B%3BNPUB%3BPUB1%2CPUB2%2CPUB7%3BNPUB1%2CNPUB2%2CNPUB3%3B%3B%3BORDALL&jur=C&page=1&dates=&pcs=Oor&lg=&pro=&nat=or&cit=none%252CC%252CCJ%252CR%252C2008E%252C%252C%252C%252C%252C%252C%252C%252C%252C%252Ctrue%252Cfalse%252Cfalse&language=cs&avg=&cid=5479422"
     ]
 
     def parse(self, response):
