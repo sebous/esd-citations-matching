@@ -1,5 +1,6 @@
 use std::fs;
 
+use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use initialize::init;
 use lib::{db::fetch_data, error::Error};
 use rules::rules::get_rules;
@@ -9,8 +10,6 @@ mod initialize;
 mod lib;
 mod process;
 mod rules;
-// #[macro_use]
-// extern crate lazy_static;
 
 fn main() {
     init();
@@ -28,10 +27,17 @@ fn process() -> Result<(), Error> {
     // TODO: handle db error
     let data = fetch_data(&db_conn).unwrap();
 
+    // setup progress bar
     let total_count = fs::read_dir(SOURCE_DATA_DIR).unwrap().count();
+    let pb = ProgressBar::new(total_count as u64);
+    pb.set_style(
+        ProgressStyle::default_bar()
+            .template("{spinner:green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len}")
+            .progress_chars("#-"),
+    );
 
     // process each file
-    for (i, path) in fs::read_dir(SOURCE_DATA_DIR).unwrap().enumerate() {
+    for path in fs::read_dir(SOURCE_DATA_DIR).unwrap().progress_with(pb) {
         let pathbuf = path.unwrap().path();
         process::process_doc(&pathbuf, &rules, &data, &db_conn)?;
     }

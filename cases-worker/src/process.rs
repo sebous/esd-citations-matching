@@ -39,7 +39,7 @@ pub fn process_doc(
     for rule in rules {
         match rule.check(&document) {
             Ok(result) => {
-                info!("{}", result.message);
+                // info!("{}", result.message);
             }
             Err(_) => continue,
         }
