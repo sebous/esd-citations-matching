@@ -27,7 +27,7 @@ pub fn process_doc(
         .flat_map(|l| {
             l.split_whitespace()
                 .map(|spl| spl.to_string())
-                .collect::<Vec<String>>()
+                .collect_vec()
         })
         .collect_vec();
 

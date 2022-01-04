@@ -1,10 +1,11 @@
 use chrono;
-use std::fs::File;
+use std::fs;
 
 use log::info;
 use simplelog::*;
 
 fn setup_logging() {
+    fs::create_dir("log").unwrap();
     let datetime = chrono::offset::Local::now().format("%F_%T").to_string();
 
     CombinedLogger::init(vec![
@@ -17,7 +18,7 @@ fn setup_logging() {
         WriteLogger::new(
             LevelFilter::Info,
             Config::default(),
-            File::create(format!("log/{}", datetime)).unwrap(),
+            fs::File::create(format!("log/{}", datetime)).unwrap(),
         ),
     ])
     .unwrap();
