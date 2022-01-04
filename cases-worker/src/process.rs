@@ -4,7 +4,7 @@ use std::{
 };
 
 use itertools::Itertools;
-use log::info;
+use log::{error, info};
 use rusqlite::Connection;
 
 use crate::{
@@ -39,7 +39,8 @@ pub fn process_doc(
     for rule in rules {
         match rule.check(&document) {
             Ok(result) => {
-                // info!("{}", result.message);
+                info!("{}", result.message);
+                error!("test error");
             }
             Err(_) => continue,
         }
