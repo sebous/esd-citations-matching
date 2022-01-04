@@ -6,10 +6,10 @@ use super::rules::{Rule, RuleCheckResult};
 pub struct ExampleRule {}
 
 impl Rule for ExampleRule {
-    fn check(document: &Document) -> Result<RuleCheckResult, Error> {
+    fn check(&self, document: &Document) -> Result<RuleCheckResult, Error> {
         Ok(RuleCheckResult {
             is_match: true,
-            message: document.words.iter().count().to_string(),
+            message: format!("total words: {}", document.words.iter().count().to_string()),
         })
     }
 }

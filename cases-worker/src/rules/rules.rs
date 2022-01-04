@@ -8,7 +8,7 @@ pub struct RuleCheckResult {
     pub is_match: bool,
 }
 pub trait Rule {
-    fn check(document: &Document) -> Result<RuleCheckResult, Error>;
+    fn check(&self, document: &Document) -> Result<RuleCheckResult, Error>;
 }
 
 pub fn get_rules() -> Vec<impl Rule> {
