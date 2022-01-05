@@ -8,7 +8,11 @@ use log::{error, info};
 use rusqlite::Connection;
 
 use crate::{
-    lib::{db::EsdCasesData, document::Document, error::Error},
+    lib::{
+        db::{save_match, EsdCasesData, Match},
+        document::Document,
+        error::Error,
+    },
     rules::rules::Rule,
 };
 
@@ -36,13 +40,26 @@ pub fn process_doc(
         words,
     };
 
+    format!("{:?}", path.file_name().unwrap());
+
     for rule in rules {
         match rule.check(&document) {
             Ok(result) => {
-                info!("{}", result.message);
-                error!("test error");
+                if result.is_match {
+                    save_match(
+                        Match {
+                            source_case: format!("{:?}", path.file_name().unwrap()),
+                            matched_case_id: result.case_id,
+                            matched_case_table: result.case_table,
+                        },
+                        db_conn,
+                    )
+                    .unwrap();
+                }
             }
-            Err(_) => continue,
+            Err(error) => {
+                error!("{}", error);
+            }
         }
     }
 

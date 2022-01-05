@@ -24,10 +24,8 @@ class EsdCases_Code(BaseModel):
 
 class Matches(BaseModel):
     source_case = peewee.CharField()
-    matched_case_fulltext = peewee.ForeignKeyField(
-        EsdCases_Fulltext, backref="matches", null=True)
-    matched_case_code = peewee.ForeignKeyField(
-        EsdCases_Code, backref="matches", null=True)
+    matched_case_id = peewee.IntegerField()
+    matched_case_table = peewee.CharField()
 
 
 models = [EsdCases_Fulltext, EsdCases_Code, Matches]

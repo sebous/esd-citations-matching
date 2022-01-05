@@ -31,3 +31,6 @@ MANIFEST
 # rust
 */target
 cases-worker/log/
+
+
+/source_data

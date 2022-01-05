@@ -8,8 +8,10 @@ pub struct ExampleRule {}
 impl Rule for ExampleRule {
     fn check(&self, document: &Document) -> Result<RuleCheckResult, Error> {
         Ok(RuleCheckResult {
-            is_match: true,
+            is_match: false,
             message: format!("total words: {}", document.words.iter().count().to_string()),
+            case_id: 0,
+            case_table: "test".to_string(),
         })
     }
 }

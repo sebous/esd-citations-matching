@@ -6,6 +6,8 @@ use crate::{
 pub struct RuleCheckResult {
     pub message: String,
     pub is_match: bool,
+    pub case_id: usize,
+    pub case_table: String,
 }
 pub trait Rule {
     fn check(&self, document: &Document) -> Result<RuleCheckResult, Error>;
