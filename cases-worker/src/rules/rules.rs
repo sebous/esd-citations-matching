@@ -1,16 +1,27 @@
+use std::path::PathBuf;
+
 use crate::{
-    lib::{document::Document, error::Error},
+    lib::{
+        db::{EsdCasesData, Match},
+        document::Document,
+        error::Error,
+    },
     rules::code_rules::FullCodeRule,
 };
 
 pub struct RuleCheckResult {
     pub message: String,
     pub is_match: bool,
-    pub case_id: Option<usize>,
-    pub case_table: Option<String>,
+    // TODO: maybe cases could be Vec<Match>?
+    pub cases: Vec<Match>,
 }
 pub trait Rule {
-    fn check(&self, document: &Document) -> Result<RuleCheckResult, Error>;
+    fn check(
+        &self,
+        document: &Document,
+        path: &PathBuf,
+        data: &EsdCasesData,
+    ) -> Result<RuleCheckResult, Error>;
 }
 
 pub fn get_rules() -> Vec<impl Rule> {

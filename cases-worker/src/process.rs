@@ -4,7 +4,7 @@ use std::{
 };
 
 use itertools::Itertools;
-use log::{error, info};
+use log::error;
 use rusqlite::Connection;
 
 use crate::{
@@ -40,21 +40,13 @@ pub fn process_doc(
         words,
     };
 
-    format!("{:?}", path.file_name().unwrap());
-
     for rule in rules {
-        match rule.check(&document) {
+        match rule.check(&document, path, data) {
             Ok(result) => {
                 if result.is_match {
-                    save_match(
-                        Match {
-                            source_case: format!("{:?}", path.file_name().unwrap()),
-                            matched_case_id: result.case_id.unwrap(),
-                            matched_case_table: result.case_table.unwrap(),
-                        },
-                        db_conn,
-                    )
-                    .unwrap();
+                    for m in result.cases {
+                        save_match(m, db_conn).unwrap();
+                    }
                 }
             }
             Err(error) => {

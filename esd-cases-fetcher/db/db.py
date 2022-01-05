@@ -1,6 +1,3 @@
-import os
-import sqlite3
-from pathlib import Path
 import peewee
 
 db = peewee.SqliteDatabase("../db/db.sqlite")
@@ -26,6 +23,7 @@ class Matches(BaseModel):
     source_case = peewee.CharField()
     matched_case_id = peewee.IntegerField()
     matched_case_table = peewee.CharField()
+    type = peewee.CharField()
 
 
 models = [EsdCases_Fulltext, EsdCases_Code, Matches]
