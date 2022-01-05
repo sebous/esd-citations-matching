@@ -50,14 +50,17 @@ impl Rule for FullCodeRule {
                         path,
                         c,
                     );
-                }
-                db::Match {
-                    source_case: util::normalize_filename(path),
-                    matched_case_table: db::EsdCaseCode::TABLE_NAME.to_string(),
-                    matched_case_id: if case.is_some() { case.unwrap().id } else { 0 },
-                    m_type: self.get_name().to_string(),
+                    None
+                } else {
+                    Some(db::Match {
+                        source_case: util::normalize_filename(path),
+                        matched_case_table: db::EsdCaseCode::TABLE_NAME.to_string(),
+                        matched_case_id: if case.is_some() { case.unwrap().id } else { 0 },
+                        m_type: self.get_name().to_string(),
+                    })
                 }
             })
+            .filter_map(|x| x)
             .collect_vec();
 
         Ok(rules::RuleCheckResult {
