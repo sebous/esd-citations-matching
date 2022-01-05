@@ -2,7 +2,7 @@ use std::fs;
 
 use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use initialize::init;
-use lib::{db::fetch_data, error::Error};
+use lib::{db, error::Error};
 use rules::rules::get_rules;
 use rusqlite::{Connection, Result};
 
@@ -28,7 +28,7 @@ fn process() -> Result<(), Error> {
     let rules = get_rules();
     // get db data
     // TODO: handle db error
-    let data = fetch_data(&db_conn).unwrap();
+    let data = db::fetch_data(&db_conn).unwrap();
 
     // setup progress bar
     let total_count = fs::read_dir(SOURCE_DATA_DIR).unwrap().count();
@@ -38,6 +38,9 @@ fn process() -> Result<(), Error> {
             .template("{spinner:green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len}")
             .progress_chars("#-"),
     );
+
+    // clear matches table
+    db::clear_matches(&db_conn).unwrap();
 
     // process each file
     for path in fs::read_dir(SOURCE_DATA_DIR).unwrap().progress_with(pb)
