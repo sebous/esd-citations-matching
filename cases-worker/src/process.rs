@@ -49,8 +49,8 @@ pub fn process_doc(
                     save_match(
                         Match {
                             source_case: format!("{:?}", path.file_name().unwrap()),
-                            matched_case_id: result.case_id,
-                            matched_case_table: result.case_table,
+                            matched_case_id: result.case_id.unwrap(),
+                            matched_case_table: result.case_table.unwrap(),
                         },
                         db_conn,
                     )

@@ -1,2 +1,2 @@
-pub mod example_rule;
+pub mod code_rules;
 pub mod rules;

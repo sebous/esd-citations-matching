@@ -11,6 +11,9 @@ mod lib;
 mod process;
 mod rules;
 
+#[macro_use]
+extern crate lazy_static;
+
 fn main() {
     init();
     process().unwrap();
