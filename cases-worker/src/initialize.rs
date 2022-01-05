@@ -20,7 +20,7 @@ fn setup_logging() {
         WriteLogger::new(
             LevelFilter::Info,
             Config::default(),
-            fs::File::create(format!("{}/{}", LOG_DIR, datetime)).unwrap(),
+            fs::File::create(format!("{}/{}.log", LOG_DIR, datetime)).unwrap(),
         ),
     ])
     .unwrap();

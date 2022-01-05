@@ -22,6 +22,7 @@ pub trait Rule {
         path: &PathBuf,
         data: &EsdCasesData,
     ) -> Result<RuleCheckResult, Error>;
+    fn get_name(&self) -> &'static str;
 }
 
 pub fn get_rules() -> Vec<impl Rule> {
