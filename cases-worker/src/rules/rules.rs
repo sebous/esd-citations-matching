@@ -6,7 +6,7 @@ use crate::{
         document::Document,
         error::Error,
     },
-    rules::full_code::FullCodeRule,
+    rules::{full_code::FullCodeRule, t_code_w_ctx::TCodeWithCtxRule},
 };
 
 pub struct RuleCheckResult {
@@ -24,7 +24,7 @@ pub trait Rule {
     fn get_name(&self) -> &'static str;
 }
 
-pub fn get_rules() -> Vec<impl Rule> {
+pub fn get_rules() -> Vec<Box<dyn Rule>> {
     // rules have to be ordered by speed
-    vec![FullCodeRule {}]
+    vec![Box::new(FullCodeRule {}), Box::new(TCodeWithCtxRule {})]
 }

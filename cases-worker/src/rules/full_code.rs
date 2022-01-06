@@ -32,6 +32,7 @@ impl Rule for FullCodeRule {
         let codes = lib::regex::C_CODE
             .captures_iter(document.full_text.as_str())
             .map(|c| util::normalize_code(&c[1]))
+            .unique()
             .collect_vec();
 
         // info!("match found, file: {}, codes: {:?}", &filename, &codes);
@@ -40,7 +41,6 @@ impl Rule for FullCodeRule {
 
         let cases = codes
             .iter()
-            .unique()
             .map(|c| {
                 let case = code_cases.iter().find(|case| &case.code == c);
                 if case.is_none() {

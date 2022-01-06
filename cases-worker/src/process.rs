@@ -18,7 +18,7 @@ use crate::{
 
 pub fn process_doc(
     path: &PathBuf,
-    rules: &Vec<impl Rule>,
+    rules: &Vec<Box<dyn Rule>>,
     data: &EsdCasesData,
     db_conn: &Connection,
 ) -> Result<(), Error> {
@@ -47,6 +47,7 @@ pub fn process_doc(
                     for m in result.cases {
                         save_match(m, db_conn).unwrap();
                     }
+                    return Ok(());
                 }
             }
             Err(error) => {
