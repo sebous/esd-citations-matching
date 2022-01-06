@@ -6,13 +6,12 @@ use crate::{
         document::Document,
         error::Error,
     },
-    rules::code_rules::FullCodeRule,
+    rules::full_code::FullCodeRule,
 };
 
 pub struct RuleCheckResult {
-    pub message: String,
+    pub message: Option<String>,
     pub is_match: bool,
-    // TODO: maybe cases could be Vec<Match>?
     pub cases: Vec<Match>,
 }
 pub trait Rule {

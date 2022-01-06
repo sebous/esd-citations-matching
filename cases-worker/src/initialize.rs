@@ -29,5 +29,5 @@ fn setup_logging() {
 /// initialize app
 pub fn init() {
     setup_logging();
-    info!("app initialized")
+    info!("cases-worker initialized")
 }

@@ -25,7 +25,7 @@ impl Rule for FullCodeRule {
             return Ok(rules::RuleCheckResult {
                 is_match: false,
                 cases: vec![],
-                message: String::new(),
+                message: None,
             });
         }
 
@@ -66,7 +66,7 @@ impl Rule for FullCodeRule {
         Ok(rules::RuleCheckResult {
             is_match: true,
             cases,
-            message: String::new(),
+            message: None,
         })
     }
 }
