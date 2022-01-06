@@ -21,8 +21,9 @@ class EsdCases_Code(BaseModel):
 
 class Matches(BaseModel):
     source_case = peewee.CharField()
-    matched_case_id = peewee.IntegerField()
-    matched_case_table = peewee.CharField()
+    matched_case_id = peewee.IntegerField(null=True)
+    matched_case_table = peewee.CharField(null=True)
+    matched_value = peewee.CharField(null=True)
     type = peewee.CharField()
 
 

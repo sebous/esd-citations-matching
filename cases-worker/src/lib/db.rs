@@ -1,5 +1,5 @@
 use itertools::Itertools;
-use rusqlite::{params, Connection, Result};
+use rusqlite::{params, types::Null, Connection, Result};
 
 #[derive(Debug)]
 pub struct EsdCaseCode {
@@ -25,8 +25,9 @@ impl EsdCaseFulltext {
 #[derive(Debug)]
 pub struct Match {
     pub source_case: String,
-    pub matched_case_id: usize,
-    pub matched_case_table: String,
+    pub matched_case_id: Option<usize>,
+    pub matched_case_table: Option<String>,
+    pub matched_value: Option<String>,
     pub m_type: String,
 }
 
@@ -72,13 +73,14 @@ pub fn fetch_data(db_conn: &Connection) -> Result<EsdCasesData> {
 pub fn save_match(match_obj: Match, db_conn: &Connection) -> Result<()> {
     db_conn.execute(
         "
-        INSERT INTO matches (source_case, matched_case_id, matched_case_table, type)
-        VALUES (?1, ?2, ?3, ?4)
+        INSERT INTO matches (source_case, matched_case_id, matched_case_table, matched_value, type)
+        VALUES (?1, ?2, ?3, ?4, ?5)
         ",
         params![
             match_obj.source_case,
             match_obj.matched_case_id,
             match_obj.matched_case_table,
+            match_obj.matched_value,
             match_obj.m_type,
         ],
     )?;

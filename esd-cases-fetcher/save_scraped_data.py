@@ -13,16 +13,17 @@ with open(f_name, mode="r", encoding="utf-8") as f:
     data = []
     codes_met = set()
     for row in scraped_data:
-        if row["code"] not in codes_met:
-            new_row = row
-            match = re.search(r"C-\d{1,4}/\d{1,2}", row["code"])
+        match = re.search(r"C-\d{1,4}/\d{1,2}", row["code"])
+        if match == None:
+            continue
+        code = match.group()
 
-            if match == None:
-                continue
-            new_row["code"] = match.group()
+        if code not in codes_met:
+            new_row = row
+            new_row["code"] = code
 
             data.append(new_row)
-            codes_met.add(row["code"])
+            codes_met.add(code)
 
     db.EsdCases_Code.delete().execute()
 

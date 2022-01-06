@@ -36,7 +36,7 @@ fn process() -> Result<(), Error> {
     pb.set_style(
         ProgressStyle::default_bar()
             .template("{spinner:green} [{elapsed_precise}] [{wide_bar:.cyan/blue}] {pos}/{len}")
-            .progress_chars("#-"),
+            .progress_chars("#>"),
     );
 
     // clear matches table

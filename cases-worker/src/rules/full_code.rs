@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use itertools::Itertools;
+use log::info;
 
 use crate::lib::{self, db, logger, util};
 
@@ -54,8 +55,9 @@ impl Rule for FullCodeRule {
                 } else {
                     Some(db::Match {
                         source_case: util::normalize_filename(path),
-                        matched_case_table: db::EsdCaseCode::TABLE_NAME.to_string(),
-                        matched_case_id: if case.is_some() { case.unwrap().id } else { 0 },
+                        matched_case_table: Some(db::EsdCaseCode::TABLE_NAME.to_string()),
+                        matched_case_id: case.map(|c| c.id),
+                        matched_value: case.map(|c| c.code.to_owned()),
                         m_type: self.get_name().to_string(),
                     })
                 }
