@@ -1,7 +1,6 @@
 use std::path::PathBuf;
 
 use itertools::Itertools;
-use log::info;
 
 use crate::lib::{self, db, logger, util};
 
@@ -35,8 +34,6 @@ impl Rule for FullCodeRule {
             .map(|c| util::normalize_code(&c[1]))
             .unique()
             .collect_vec();
-
-        // info!("match found, file: {}, codes: {:?}", &filename, &codes);
 
         let (code_cases, _) = data;
 

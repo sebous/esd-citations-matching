@@ -1,9 +1,8 @@
 use std::path::PathBuf;
 
 use itertools::Itertools;
-use log::info;
 
-use crate::lib::{db, document, error, logger, regex, util};
+use crate::lib::{db, document, error, regex, util};
 
 use super::rules::{self, Rule};
 
@@ -40,24 +39,17 @@ impl Rule for NumCodeWithCtxRule {
             });
         }
 
-        let codes = regex::CODE
+        let cases = regex::CODE
             .captures_iter(&document.full_text)
             .filter(|c| !regex::T_CODE.is_match(&c[0]))
             .map(|c| util::normalize_code(&c[1]))
             .unique()
-            .collect_vec();
-
-        let cases = codes
-            .iter()
-            .map(|c| {
-                logger::rule_info(self.get_name(), "match found", path, c);
-                db::Match {
-                    source_case: util::normalize_filename(path),
-                    matched_case_table: None,
-                    matched_case_id: None,
-                    matched_value: Some(c.to_owned()),
-                    m_type: self.get_name().to_string(),
-                }
+            .map(|c| db::Match {
+                source_case: util::normalize_filename(path),
+                matched_case_table: None,
+                matched_case_id: None,
+                matched_value: Some(c.to_owned()),
+                m_type: self.get_name().to_string(),
             })
             .collect_vec();
 
