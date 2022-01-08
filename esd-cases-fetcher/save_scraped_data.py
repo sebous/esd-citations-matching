@@ -5,6 +5,8 @@ from typing import List
 from db import db
 import re
 
+db.init()
+
 f_name = os.path.join("scraper", "data.json")
 with open(f_name, mode="r", encoding="utf-8") as f:
     scraped_data: List = json.load(f)
