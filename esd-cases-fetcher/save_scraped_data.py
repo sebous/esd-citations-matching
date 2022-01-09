@@ -27,7 +27,7 @@ with open(f_name, mode="r", encoding="utf-8") as f:
             data.append(new_row)
             codes_met.add(code)
 
-    db.EsdCases_Code.delete().execute()
+    db.EsdCases.delete().execute()
 
     with db.db.atomic():
-        db.EsdCases_Code.insert_many(data).execute()
+        db.EsdCases.insert_many(data).execute()

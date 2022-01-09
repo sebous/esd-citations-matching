@@ -8,26 +8,26 @@ class BaseModel(peewee.Model):
         database = db
 
 
-class EsdCases_Fulltext(BaseModel):
-    text = peewee.CharField()
+class EsdCases(BaseModel):
+    code = peewee.CharField(unique=True)
+    short_name = peewee.CharField()
+    full_name = peewee.CharField(null=True)
     date = peewee.DateField(null=True)
 
 
-class EsdCases_Code(BaseModel):
-    short_name = peewee.CharField(null=True)
-    code = peewee.CharField(null=True)
-    date = peewee.DateField(null=True)
+class EsdRelatedCases(BaseModel):
+    code = peewee.CharField(unique=True)
+    parent_case = peewee.ForeignKeyField(EsdCases, backref="related_cases")
 
 
 class Matches(BaseModel):
     source_case = peewee.CharField()
-    matched_case_id = peewee.IntegerField(null=True)
-    matched_case_table = peewee.CharField(null=True)
-    matched_value = peewee.CharField(null=True)
+    matched_case = peewee.ForeignKeyField(EsdCases, backref="matches")
+    matched_value = peewee.CharField()
     type = peewee.CharField()
 
 
-models = [EsdCases_Fulltext, EsdCases_Code, Matches]
+models = [EsdCases, EsdRelatedCases, Matches]
 
 
 def init():
