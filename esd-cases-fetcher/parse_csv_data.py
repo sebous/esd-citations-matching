@@ -140,6 +140,7 @@ for filename in os.listdir(dir_name):
 
 
 # print missing
-missing = sorted([item + "\n"for sublist in missing_codes for item in sublist])
+print(missing_codes)
+missing = [" ".join(items) + "\n"for items in missing_codes]
 log_file = open("missing.log", "w")
 log_file.writelines(missing)
