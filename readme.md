@@ -1,6 +1,6 @@
 # ESD citations
 
-## Project goals
+## Process
 - scrape esd cases data from [curia](https://curia.europa.eu)
 - extract additional cases data from csv exports in `/esd-cases-fetcher/csv_source`
 - combine both datasets and create db structure
