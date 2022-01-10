@@ -6,8 +6,6 @@ from peewee import DatabaseError
 
 from db import db
 
-db.init()
-
 dir_name = "csv_source"
 
 
@@ -75,82 +73,83 @@ def extract_codes(input: str):
     return output
 
 
-# missing_codes = []
-db.EsdRelatedCases.delete().execute()
+def parse_csv_data():
+    # missing_codes = []
+    db.EsdRelatedCases.delete().execute()
 
+    for filename in os.listdir(dir_name):
+        f_name = os.path.join(dir_name, filename)
+        if not os.path.isfile(f_name):
+            continue
 
-for filename in os.listdir(dir_name):
-    f_name = os.path.join(dir_name, filename)
-    if not os.path.isfile(f_name):
-        continue
+        with open(f_name, mode="r", encoding="utf-8-sig") as f:
+            reader = csv.DictReader(
+                f, delimiter=',')
 
-    with open(f_name, mode="r", encoding="utf-8-sig") as f:
-        reader = csv.DictReader(
-            f, delimiter=',')
-
-        related_cases_data = []
-        for i, line in enumerate(reader):
-            name_parts = line["Název"].split("#")
-            code_part = name_parts[-1]
-            if line["Název"] == "" or code_part == "":
-                continue
-            full_name = name_parts[1]
-
-            codes = extract_codes(code_part)
-
-            try:
-                query: "list[db.EsdCases]" = db.EsdCases.select(db.EsdCases.code, db.EsdCases.id).where(
-                    db.EsdCases.code.in_(codes))
-
-                # skip if code missing
-                if len(query) == 0:
+            related_cases_data = []
+            for i, line in enumerate(reader):
+                name_parts = line["Název"].split("#")
+                code_part = name_parts[-1]
+                if line["Název"] == "" or code_part == "":
                     continue
+                full_name = name_parts[1]
 
-                # one code match
-                if len(query) == 1:
-                    row = query[0]
+                codes = extract_codes(code_part)
 
-                    # update full_name in main table
-                    record: db.EsdCases = db.EsdCases.get_by_id(query[0].id)
-                    if record.full_name == None or record.full_name == "":
-                        record.full_name = full_name
-                        record.save()
+                try:
+                    query: "list[db.EsdCases]" = db.EsdCases.select(db.EsdCases.code, db.EsdCases.id).where(
+                        db.EsdCases.code.in_(codes))
 
-                    # insert related cases into related table
-                    related_codes = [c for c in codes if record.code != c]
-                    if len(related_codes) == 0:
+                    # skip if code missing
+                    if len(query) == 0:
                         continue
 
-                    for code in related_codes:
-                        related_cases_data.append(
-                            {"parent_case_id": record.id, "code": code})
+                    # one code match
+                    if len(query) == 1:
+                        row = query[0]
 
-                # multiple codes match, related cases will be joined to the first code found (they are all related anyway)
-                if len(query) > 1:
-                    related_codes = []
-                    parent_case_id = None
-                    for esd_case in query:
-                        case: db.EsdCases = db.EsdCases.get_or_none(
-                            db.EsdCases.code == esd_case.code)
-                        if case == None:
-                            related_codes.append(esd_case.code)
-                        else:
-                            case.full_name = esd_case.full_name
-                            case.save()
-                            if parent_case_id == None:
-                                parent_case_id = case.id
+                        # update full_name in main table
+                        record: db.EsdCases = db.EsdCases.get_by_id(
+                            query[0].id)
+                        if record.full_name == None or record.full_name == "":
+                            record.full_name = full_name
+                            record.save()
+
+                        # insert related cases into related table
+                        related_codes = [c for c in codes if record.code != c]
+                        if len(related_codes) == 0:
+                            continue
 
                         for code in related_codes:
                             related_cases_data.append(
-                                {"parent_case_id": parent_case_id, "code": code})
+                                {"parent_case_id": record.id, "code": code})
 
+                    # multiple codes match, related cases will be joined to the first code found (they are all related anyway)
+                    if len(query) > 1:
+                        related_codes = []
+                        parent_case_id = None
+                        for esd_case in query:
+                            case: db.EsdCases = db.EsdCases.get_or_none(
+                                db.EsdCases.code == esd_case.code)
+                            if case == None:
+                                related_codes.append(esd_case.code)
+                            else:
+                                case.full_name = esd_case.full_name
+                                case.save()
+                                if parent_case_id == None:
+                                    parent_case_id = case.id
+
+                            for code in related_codes:
+                                related_cases_data.append(
+                                    {"parent_case_id": parent_case_id, "code": code})
+
+                except DatabaseError as err:
+                    print(f"{err}, codes: {codes}")
+
+            try:
+                with db.db.atomic():
+                    db.EsdRelatedCases.insert_many(
+                        related_cases_data).on_conflict_ignore().execute()
+                    related_cases_data = []
             except DatabaseError as err:
-                print(f"{err}, codes: {codes}")
-
-        try:
-            with db.db.atomic():
-                db.EsdRelatedCases.insert_many(
-                    related_cases_data).on_conflict_ignore().execute()
-                related_cases_data = []
-        except DatabaseError as err:
-            print(err)
+                print(err)
