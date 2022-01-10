@@ -1,9 +1,8 @@
 import csv
 import os
 import re
-from datetime import datetime
 
-from peewee import DoesNotExist
+from peewee import DatabaseError
 
 from db import db
 
@@ -11,21 +10,11 @@ db.init()
 
 dir_name = "csv_source"
 
-res: "list[db.EsdCases]" = db.EsdCases.select()
-
-# print([case.code for case in res])
-# print(res)
-
-# r2 = db.EsdCases.select().where(db.EsdCases.code.in_(["C-740/18"]))
-# print(len(r2))
-# print([case for case in r2])
-
 
 def extract_codes(input: str):
     output: list[str] = []
     input_list = list(re.finditer(
         r"(?<![a-zA-Z])\d{1,4}(?:-\d{1,4})?(?:/{1,2}\d{2})?", input))
-    # print(input, input_list)
 
     dash_as_fwdslash = False
 
@@ -79,15 +68,16 @@ def extract_codes(input: str):
 
     output.sort(key=lambda str: int(str.split("/")[0]))
     output = [f"C-{code}" for code in output]
+
     # print(output)
     if len(output) == 0:
         print(input, output)
     return output
 
 
-# extract_codes("219-228, 230-235, 237, 238 a 240-242/80.' PAD2")
+# missing_codes = []
+db.EsdRelatedCases.delete().execute()
 
-missing_codes = []
 
 for filename in os.listdir(dir_name):
     f_name = os.path.join(dir_name, filename)
@@ -98,49 +88,69 @@ for filename in os.listdir(dir_name):
         reader = csv.DictReader(
             f, delimiter=',')
 
-        data = []
+        related_cases_data = []
         for i, line in enumerate(reader):
-            name = line["Název"]
-            code_part = name.split("#")[-1]
-            if code_part == "":
+            name_parts = line["Název"].split("#")
+            code_part = name_parts[-1]
+            if line["Název"] == "" or code_part == "":
                 continue
+            full_name = name_parts[1]
 
             codes = extract_codes(code_part)
 
             try:
-                query: "list[db.EsdCases]" = db.EsdCases.select(db.EsdCases.code).where(
+                query: "list[db.EsdCases]" = db.EsdCases.select(db.EsdCases.code, db.EsdCases.id).where(
                     db.EsdCases.code.in_(codes))
+
+                # skip if code missing
                 if len(query) == 0:
-                    # print(f"{codes} not found")
-                    missing_codes.append(codes)
+                    continue
 
-                # if len(codes) > 1:
-            except:
-                print(f"{codes} db error")
+                # one code match
+                if len(query) == 1:
+                    row = query[0]
 
-            # code_matches = re.findall(
-            #     r"\d{1,4}[\/\-\-]\d{1,2}", code_part)
+                    # update full_name in main table
+                    record: db.EsdCases = db.EsdCases.get_by_id(query[0].id)
+                    if record.full_name == None or record.full_name == "":
+                        record.full_name = full_name
+                        record.save()
 
-            # if len(code_matches) > 1:
-            #     print(code_part)
+                    # insert related cases into related table
+                    related_codes = [c for c in codes if record.code != c]
+                    if len(related_codes) == 0:
+                        continue
 
-            #     date_str = line["Datum dokumentu"]
+                    for code in related_codes:
+                        related_cases_data.append(
+                            {"parent_case_id": record.id, "code": code})
 
-            #     date = datetime.strptime(date_str, "%Y-%m-%d")
+                # multiple codes match, related cases will be joined to the first code found (they are all related anyway)
+                if len(query) > 1:
+                    related_codes = []
+                    parent_case_id = None
+                    for esd_case in query:
+                        case: db.EsdCases = db.EsdCases.get_or_none(
+                            db.EsdCases.code == esd_case.code)
+                        if case == None:
+                            related_codes.append(esd_case.code)
+                        else:
+                            case.full_name = esd_case.full_name
+                            case.save()
+                            if parent_case_id == None:
+                                parent_case_id = case.id
 
-            #     if name == "":
-            #         print(
-            #             f"error --> empty Name field, line: {i + 2}, filename: {f_name}, skipping...")
-            #         continue
+                        for code in related_codes:
+                            related_cases_data.append(
+                                {"parent_case_id": parent_case_id, "code": code})
 
-            #     data.append({"text": name, "date": date})
+            except DatabaseError as err:
+                print(f"{err}, codes: {codes}")
 
-            # with db.db.atomic():
-            #     db.EsdCases_Fulltext.insert_many(data).execute()
-
-
-# print missing
-print(missing_codes)
-missing = [" ".join(items) + "\n"for items in missing_codes]
-log_file = open("missing.log", "w")
-log_file.writelines(missing)
+        try:
+            with db.db.atomic():
+                db.EsdRelatedCases.insert_many(
+                    related_cases_data).on_conflict_ignore().execute()
+                related_cases_data = []
+        except DatabaseError as err:
+            print(err)

@@ -1,3 +1,4 @@
+from enum import unique
 import peewee
 
 db = peewee.SqliteDatabase("../db/db.sqlite")
@@ -9,6 +10,7 @@ class BaseModel(peewee.Model):
 
 
 class EsdCases(BaseModel):
+    id = peewee.AutoField()
     code = peewee.CharField(unique=True)
     short_name = peewee.CharField()
     full_name = peewee.CharField(null=True)
@@ -16,11 +18,13 @@ class EsdCases(BaseModel):
 
 
 class EsdRelatedCases(BaseModel):
-    code = peewee.CharField(unique=True)
+    id = peewee.AutoField()
     parent_case = peewee.ForeignKeyField(EsdCases, backref="related_cases")
+    code = peewee.CharField(unique=True)
 
 
 class Matches(BaseModel):
+    id = peewee.AutoField()
     source_case = peewee.CharField()
     matched_case = peewee.ForeignKeyField(EsdCases, backref="matches")
     matched_value = peewee.CharField()
