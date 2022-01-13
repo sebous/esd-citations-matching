@@ -1,6 +1,6 @@
 use std::path::PathBuf;
 
-use super::document::Document;
+use super::Document;
 
 const HYPHEN: char = '\u{2010}';
 const NON_BREAK_HYPHEN: char = '\u{2011}';

@@ -10,8 +10,7 @@ use rusqlite::Connection;
 use crate::{
     lib::{
         db::{save_match, EsdCasesData, Match},
-        document::Document,
-        error::Error,
+        Document, Error,
     },
     rules::rules::Rule,
 };

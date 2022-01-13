@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use itertools::Itertools;
 
-use crate::lib::{db, document, error, regex, util};
+use crate::lib::{db, regex, util, Document, Error};
 
 use super::rules::{self, Rule};
 
@@ -15,10 +15,10 @@ impl Rule for NumCodeWithCtxRule {
 
     fn check(
         &self,
-        document: &document::Document,
+        document: &Document,
         path: &PathBuf,
         data: &db::EsdCasesData,
-    ) -> Result<rules::RuleCheckResult, error::Error> {
+    ) -> Result<rules::RuleCheckResult, Error> {
         let match_found = regex::CODE.is_match(&document.full_text);
 
         if !match_found {

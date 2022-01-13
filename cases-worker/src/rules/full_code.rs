@@ -15,10 +15,10 @@ impl Rule for FullCodeRule {
 
     fn check(
         &self,
-        document: &lib::document::Document,
+        document: &lib::Document,
         path: &PathBuf,
         data: &db::EsdCasesData,
-    ) -> Result<rules::RuleCheckResult, lib::error::Error> {
+    ) -> Result<rules::RuleCheckResult, lib::Error> {
         let match_found = lib::regex::C_CODE.is_match(document.full_text.as_str());
 
         if !match_found {

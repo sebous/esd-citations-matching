@@ -11,6 +11,7 @@ fn setup_logging() {
     let datetime = chrono::offset::Local::now().format("%F_%T").to_string();
 
     CombinedLogger::init(vec![
+        // turn on for log debugging
         TermLogger::new(
             LevelFilter::Off,
             Config::default(),

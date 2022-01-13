@@ -2,7 +2,7 @@ use std::fs;
 
 use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use initialize::init;
-use lib::{db, error::Error};
+use lib::{db, Error};
 use rules::rules::get_rules;
 use rusqlite::{Connection, Result};
 
