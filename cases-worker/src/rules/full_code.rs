@@ -2,7 +2,11 @@ use std::path::PathBuf;
 
 use itertools::Itertools;
 
-use crate::lib::{self, db, logger, util, Error};
+use crate::lib::{
+    self,
+    db::{self, Code},
+    logger, util, Error,
+};
 
 use super::rules::{self, Rule};
 
@@ -24,7 +28,7 @@ impl Rule for FullCodeRule {
         if !match_found {
             return Ok(rules::RuleCheckResult {
                 is_match: false,
-                cases: vec![],
+                matches: vec![],
                 message: None,
             });
         }
@@ -35,34 +39,35 @@ impl Rule for FullCodeRule {
             .unique()
             .collect_vec();
 
-        let cases = codes
+        let matches = codes
             .iter()
-            .map(|c| {
-                let case = code_cases.iter().find(|case| &case.code == c);
-                if case.is_none() {
-                    logger::rule_warning(
-                        self.get_name(),
-                        "found esd code not exists in db",
-                        path,
-                        c,
-                    );
-                    None
-                } else {
-                    Some(db::Match {
+            .map(|code| {
+                let matched_case = data.iter().find(|&case| case.get_codes().contains(code));
+                match matched_case {
+                    None => {
+                        logger::rule_warning(
+                            self.get_name(),
+                            "found matching code that doesn't exist in db",
+                            path,
+                            code,
+                        );
+                        None
+                    }
+                    Some(case) => Some(db::Match {
                         source_case: util::normalize_filename(path),
-                        matched_case_table: Some(db::EsdCaseCode::TABLE_NAME.to_string()),
-                        matched_case_id: case.map(|c| c.id),
-                        matched_value: case.map(|c| c.code.to_owned()),
+                        matched_case_id: case.id,
+                        matched_value: case.code.to_owned(),
                         m_type: self.get_name().to_string(),
-                    })
+                    }),
                 }
             })
             .filter_map(|x| x)
+            .unique_by(|m| m.matched_case_id)
             .collect_vec();
 
         Ok(rules::RuleCheckResult {
             is_match: true,
-            cases,
+            matches,
             message: None,
         })
     }

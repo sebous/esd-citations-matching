@@ -37,7 +37,7 @@ pub fn process_doc(
         match rule.check(&document, path, data) {
             Ok(result) => {
                 if result.is_match {
-                    for m in result.cases {
+                    for m in result.matches {
                         db::save_match(m, db_conn).unwrap();
                     }
                     return Ok(());

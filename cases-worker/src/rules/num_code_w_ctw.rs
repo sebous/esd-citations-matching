@@ -25,7 +25,7 @@ impl Rule for NumCodeWithCtxRule {
             return Ok(rules::RuleCheckResult {
                 is_match: false,
                 message: None,
-                cases: vec![],
+                matches: vec![],
             });
         }
 
@@ -35,7 +35,7 @@ impl Rule for NumCodeWithCtxRule {
             return Ok(rules::RuleCheckResult {
                 is_match: false,
                 message: None,
-                cases: vec![],
+                matches: vec![],
             });
         }
 
@@ -55,7 +55,7 @@ impl Rule for NumCodeWithCtxRule {
 
         Ok(rules::RuleCheckResult {
             is_match: true,
-            cases,
+            matches: cases,
             message: None,
         })
     }

@@ -12,17 +12,17 @@ pub struct EsdCase {
     pub related_cases: Vec<EsdRelatedCase>,
 }
 
-trait Code {
-    fn get_codes(&'static self) -> Box<dyn Iterator<Item = &String>>;
+pub trait Code {
+    fn get_codes(&self) -> Box<dyn Iterator<Item = &String> + '_>;
 }
 
 impl Code for EsdCase {
-    fn get_codes(&'static self) -> Box<dyn Iterator<Item = &String>> {
+    fn get_codes(&self) -> Box<dyn Iterator<Item = &String> + '_> {
         Box::new(once(&self.code).chain(self.related_cases.iter().map(|c| &c.code)))
     }
 }
 impl Code for Vec<EsdCase> {
-    fn get_codes(&'static self) -> Box<dyn Iterator<Item = &String>> {
+    fn get_codes(&self) -> Box<dyn Iterator<Item = &String> + '_> {
         Box::new(self.iter().flat_map(|case| case.get_codes()))
     }
 }
@@ -79,10 +79,14 @@ pub fn fetch_data(db_conn: &Connection) -> Result<Vec<EsdCase>> {
         .fold(vec![], |mut result: Vec<EsdCase>, row| {
             let last_item = result.iter().last();
             if last_item.is_some() && last_item.unwrap().id == row.id {
-                result.last().unwrap().related_cases.push(EsdRelatedCase {
-                    id: row.rel_id.unwrap(),
-                    code: row.rel_code.unwrap(),
-                });
+                result
+                    .last_mut()
+                    .unwrap()
+                    .related_cases
+                    .push(EsdRelatedCase {
+                        id: row.rel_id.unwrap(),
+                        code: row.rel_code.unwrap(),
+                    });
                 return result;
             }
 

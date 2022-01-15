@@ -5,13 +5,13 @@ use crate::{
         db::{EsdCase, Match},
         Document, Error,
     },
-    rules::{full_code::FullCodeRule, num_code_w_ctw::NumCodeWithCtxRule},
+    rules::full_code::FullCodeRule,
 };
 
 pub struct RuleCheckResult {
     pub message: Option<String>,
     pub is_match: bool,
-    pub cases: Vec<Match>,
+    pub matches: Vec<Match>,
 }
 pub trait Rule {
     fn check(
@@ -25,5 +25,6 @@ pub trait Rule {
 
 pub fn get_rules() -> Vec<Box<dyn Rule>> {
     // rules have to be ordered by speed
-    vec![Box::new(FullCodeRule {}), Box::new(NumCodeWithCtxRule {})]
+    // vec![Box::new(FullCodeRule {}), Box::new(NumCodeWithCtxRule {})]
+    vec![Box::new(FullCodeRule {})]
 }
