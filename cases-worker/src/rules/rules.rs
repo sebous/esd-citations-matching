@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::{
     lib::{
-        db::{EsdCasesData, Match},
+        db::{EsdCase, Match},
         Document, Error,
     },
     rules::{full_code::FullCodeRule, num_code_w_ctw::NumCodeWithCtxRule},
@@ -18,7 +18,7 @@ pub trait Rule {
         &self,
         document: &Document,
         path: &PathBuf,
-        data: &EsdCasesData,
+        data: &Vec<EsdCase>,
     ) -> Result<RuleCheckResult, Error>;
     fn get_name(&self) -> &'static str;
 }

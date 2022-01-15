@@ -1,24 +1,18 @@
-use std::{
-    fs::{self},
-    path::PathBuf,
-};
+use std::{fs, path::PathBuf};
 
 use itertools::Itertools;
 use log::error;
 use rusqlite::Connection;
 
 use crate::{
-    lib::{
-        db::{save_match, EsdCasesData, Match},
-        Document, Error,
-    },
-    rules::rules::Rule,
+    lib::{db, Document, Error},
+    rules::Rule,
 };
 
 pub fn process_doc(
     path: &PathBuf,
     rules: &Vec<Box<dyn Rule>>,
-    data: &EsdCasesData,
+    data: &Vec<db::EsdCase>,
     db_conn: &Connection,
 ) -> Result<(), Error> {
     // println!("{}", path.display());
@@ -44,7 +38,7 @@ pub fn process_doc(
             Ok(result) => {
                 if result.is_match {
                     for m in result.cases {
-                        save_match(m, db_conn).unwrap();
+                        db::save_match(m, db_conn).unwrap();
                     }
                     return Ok(());
                 }

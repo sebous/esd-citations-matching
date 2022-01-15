@@ -1,4 +1,5 @@
-use itertools::Itertools;
+use std::iter::once;
+
 use rusqlite::{params, types::Null, Connection, Result};
 
 #[derive(Debug)]
@@ -9,6 +10,21 @@ pub struct EsdCase {
     pub full_name: Option<String>,
     pub date: String,
     pub related_cases: Vec<EsdRelatedCase>,
+}
+
+trait Code {
+    fn get_codes(&'static self) -> Box<dyn Iterator<Item = &String>>;
+}
+
+impl Code for EsdCase {
+    fn get_codes(&'static self) -> Box<dyn Iterator<Item = &String>> {
+        Box::new(once(&self.code).chain(self.related_cases.iter().map(|c| &c.code)))
+    }
+}
+impl Code for Vec<EsdCase> {
+    fn get_codes(&'static self) -> Box<dyn Iterator<Item = &String>> {
+        Box::new(self.iter().flat_map(|case| case.get_codes()))
+    }
 }
 
 #[derive(Debug)]
@@ -80,7 +96,6 @@ pub fn fetch_data(db_conn: &Connection) -> Result<Vec<EsdCase>> {
             });
             result
         });
-
     Ok(cases)
 }
 

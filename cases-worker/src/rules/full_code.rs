@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use itertools::Itertools;
 
-use crate::lib::{self, db, logger, util};
+use crate::lib::{self, db, logger, util, Error};
 
 use super::rules::{self, Rule};
 
@@ -17,8 +17,8 @@ impl Rule for FullCodeRule {
         &self,
         document: &lib::Document,
         path: &PathBuf,
-        data: &db::EsdCasesData,
-    ) -> Result<rules::RuleCheckResult, lib::Error> {
+        data: &Vec<db::EsdCase>,
+    ) -> Result<rules::RuleCheckResult, Error> {
         let match_found = lib::regex::C_CODE.is_match(document.full_text.as_str());
 
         if !match_found {
@@ -34,8 +34,6 @@ impl Rule for FullCodeRule {
             .map(|c| util::normalize_code(&c[1]))
             .unique()
             .collect_vec();
-
-        let (code_cases, _) = data;
 
         let cases = codes
             .iter()
