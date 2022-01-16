@@ -1,5 +1,6 @@
 use std::iter::once;
 
+use itertools::Itertools;
 use rusqlite::{params, types::Null, Connection, Result};
 
 #[derive(Debug)]
@@ -96,7 +97,10 @@ pub fn fetch_data(db_conn: &Connection) -> Result<Vec<EsdCase>> {
                 short_name: row.short_name,
                 full_name: row.full_name,
                 date: row.date,
-                related_cases: vec![],
+                related_cases: row
+                    .rel_id
+                    .and_then(|id| row.rel_code.map(|c| vec![EsdRelatedCase { id, code: c }]))
+                    .unwrap_or(vec![]),
             });
             result
         });
@@ -123,4 +127,28 @@ pub fn save_match(match_obj: Match, db_conn: &Connection) -> Result<()> {
 pub fn clear_matches(db_conn: &Connection) -> Result<()> {
     db_conn.execute("DELETE FROM matches", [])?;
     Ok(())
+}
+#[test]
+fn test() {
+    let case = EsdCase {
+        id: 1,
+        code: "C-1/01".to_string(),
+        date: String::new(),
+        full_name: None,
+        short_name: String::new(),
+        related_cases: vec![
+            EsdRelatedCase {
+                id: 2,
+                code: String::from("C-2/01"),
+            },
+            EsdRelatedCase {
+                id: 3,
+                code: "C-3/01".to_string(),
+            },
+        ],
+    };
+    assert_eq!(
+        case.get_codes().map(|s| s.as_str()).collect_vec(),
+        vec!["C-1/01", "C-2/01", "C-3/01"]
+    );
 }
