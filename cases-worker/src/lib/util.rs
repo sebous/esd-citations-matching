@@ -61,5 +61,11 @@ pub fn find_keyword_in_radius(document: &Document, start: usize, end: usize) -> 
 }
 
 pub fn check_if_t_code(document: &Document, start: usize) -> bool {
-    start > 2 && document.full_text.chars().nth(start - 2).unwrap() == 'T'
+    if start < 2 {
+        return false;
+    }
+    if let Some(ch) = document.full_text.chars().nth(start - 2) {
+        return ch == 'T';
+    }
+    false
 }
