@@ -1,5 +1,7 @@
 use std::path::PathBuf;
 
+use itertools::Itertools;
+
 use super::Document;
 
 const HYPHEN: char = '\u{2010}';
@@ -11,7 +13,7 @@ const RETURN: char = '\n';
 const RETURN_WIN: char = '\r';
 
 lazy_static! {
-    static ref DVUR_VARIANTS: Vec<&'static str> = vec!["dvůr", "dvora", "dvoře", "dvorem"];
+    static ref KEYWORD_VARIANTS: Vec<&'static str> = vec!["dvůr", "dvora", "dvoře", "dvorem"];
 }
 
 pub fn normalize_code(code: &str) -> String {
@@ -32,15 +34,32 @@ pub fn normalize_filename(path: &PathBuf) -> String {
     format!("{:?}", path.file_name().unwrap()).replace("\"", "")
 }
 
-pub fn check_dvur_existence(document: &Document) -> Option<String> {
-    for word in &document.words {
-        let found_variant = DVUR_VARIANTS
-            .iter()
-            .find(|&v| v == &word.to_lowercase().as_str());
+const KEYWORD_SEARCH_RADIUS: usize = 1000;
 
-        if found_variant.is_some() {
-            return found_variant.map(|v| v.to_string());
-        }
-    }
-    None
+pub fn find_keyword_in_radius(document: &Document, start: usize, end: usize) -> Option<String> {
+    let text_l = document.full_text.len();
+    let start = if start > KEYWORD_SEARCH_RADIUS {
+        start - KEYWORD_SEARCH_RADIUS
+    } else {
+        0
+    };
+    let end = if end + KEYWORD_SEARCH_RADIUS < text_l {
+        end + KEYWORD_SEARCH_RADIUS
+    } else {
+        text_l
+    };
+
+    let str_rad = &document
+        .full_text
+        .chars()
+        .skip(start)
+        .take(end - start)
+        .collect::<String>();
+
+    let found_keyword = KEYWORD_VARIANTS.iter().find(|&key| str_rad.contains(key));
+    found_keyword.map(|k| k.to_string())
+}
+
+pub fn check_if_t_code(document: &Document, start: usize) -> bool {
+    start > 2 && document.full_text.chars().nth(start - 2).unwrap() == 'T'
 }

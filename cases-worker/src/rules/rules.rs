@@ -5,7 +5,7 @@ use crate::{
         db::{EsdCase, Match},
         Document, Error,
     },
-    rules::full_code::FullCodeRule,
+    rules::{full_code::FullCodeRule, NumCodeWithKey},
 };
 
 pub struct RuleCheckResult {
@@ -26,5 +26,5 @@ pub trait Rule {
 pub fn get_rules() -> Vec<Box<dyn Rule>> {
     // rules have to be ordered by speed
     // vec![Box::new(FullCodeRule {}), Box::new(NumCodeWithCtxRule {})]
-    vec![Box::new(FullCodeRule {})]
+    vec![Box::new(FullCodeRule {}), Box::new(NumCodeWithKey {})]
 }

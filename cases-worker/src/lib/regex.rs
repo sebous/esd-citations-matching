@@ -9,5 +9,5 @@ lazy_static! {
         Regex::new(r"(T\s*[--]\s*\d{1,4}[/\--]\d{1,2})([ \u202F\u00A0,.)]|$)").unwrap();
     /// num only XXX/XX
     pub static ref CODE: Regex =
-        Regex::new(r"(\d{1,4}[/\--]\d{1,2})([ \u202F\u00A0,.)]|$)").unwrap();
+        Regex::new(r"[\s\u202F\u00A0](\d{1,4}[/\--]\d{1,2})([\s\u202F\u00A0,.)]|$)").unwrap();
 }

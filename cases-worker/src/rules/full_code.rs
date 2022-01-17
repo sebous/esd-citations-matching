@@ -14,7 +14,7 @@ pub struct FullCodeRule {}
 
 impl Rule for FullCodeRule {
     fn get_name(&self) -> &'static str {
-        "full_code_C"
+        "full_code_c"
     }
 
     fn check(
