@@ -1,3 +1,4 @@
+pub mod benchmark;
 pub mod db;
 mod document;
 mod error;

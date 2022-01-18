@@ -36,7 +36,11 @@ pub fn normalize_filename(path: &PathBuf) -> String {
 
 const KEYWORD_SEARCH_RADIUS: usize = 500;
 
-pub fn find_keyword_in_radius(document: &Document, start: usize, end: usize) -> Option<String> {
+pub fn find_keyword_in_radius(
+    document: &Document,
+    start: usize,
+    end: usize,
+) -> Option<(String, String)> {
     let text_l = document.full_text.len();
     let start = if start > KEYWORD_SEARCH_RADIUS {
         start - KEYWORD_SEARCH_RADIUS
@@ -60,7 +64,8 @@ pub fn find_keyword_in_radius(document: &Document, start: usize, end: usize) -> 
     // if found_keyword.is_some() {
     //     println!("{}\n{}\n------", str_rad, found_keyword.unwrap());
     // }
-    found_keyword.map(|k| k.to_string())
+
+    found_keyword.and_then(|&k| Some((k.to_string(), str_rad.to_owned())))
 }
 
 pub fn check_if_t_code(document: &Document, start: usize) -> bool {

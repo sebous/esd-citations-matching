@@ -1,8 +1,9 @@
+#![feature(test)]
 use std::fs;
 
 use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use initialize::init;
-use lib::{db, Error};
+use lib::{db, regex, Error};
 use rules::get_rules;
 use rusqlite::{Connection, Result};
 
@@ -29,6 +30,9 @@ fn process() -> Result<(), Error> {
     // get db data
     // TODO: handle db error
     let data = db::fetch_data(&db_conn).unwrap();
+    // generate regexes from short_names
+    let regexes = regex::generate_short_name_regexes(&data);
+    dbg!(&regexes.len());
 
     // setup progress bar
     let total_count = fs::read_dir(SOURCE_DATA_DIR).unwrap().count();
@@ -44,10 +48,10 @@ fn process() -> Result<(), Error> {
 
     // process each file
     for path in fs::read_dir(SOURCE_DATA_DIR).unwrap().progress_with(pb)
-    // .take(1000)
+    // .take(1)
     {
         let pathbuf = path.unwrap().path();
-        process::process_doc(&pathbuf, &rules, &data, &db_conn)?;
+        process::process_doc(&pathbuf, &rules, &data, &regexes, &db_conn)?;
     }
 
     Ok(())

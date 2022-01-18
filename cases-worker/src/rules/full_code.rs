@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use itertools::Itertools;
+use regex::Regex;
 
 use crate::lib::{
     self,
@@ -22,6 +23,7 @@ impl Rule for FullCodeRule {
         document: &lib::Document,
         path: &PathBuf,
         data: &Vec<db::EsdCase>,
+        regexes: &Vec<(usize, Regex)>,
     ) -> Result<rules::RuleCheckResult, Error> {
         let match_found = lib::regex::C_CODE.is_match(document.full_text.as_str());
 

@@ -1,5 +1,6 @@
 use std::path::PathBuf;
 
+use ::regex::Regex;
 use itertools::Itertools;
 
 use crate::lib::{
@@ -21,6 +22,7 @@ impl Rule for NumCodeWithKey {
         document: &Document,
         path: &PathBuf,
         data: &Vec<db::EsdCase>,
+        regexes: &Vec<(usize, Regex)>,
     ) -> Result<super::RuleCheckResult, Error> {
         let match_found = regex::CODE.is_match(&document.full_text);
 

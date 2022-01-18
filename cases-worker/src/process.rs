@@ -2,6 +2,7 @@ use std::{fs, path::PathBuf};
 
 use itertools::Itertools;
 use log::error;
+use regex::Regex;
 use rusqlite::Connection;
 
 use crate::{
@@ -13,6 +14,7 @@ pub fn process_doc(
     path: &PathBuf,
     rules: &Vec<Box<dyn Rule>>,
     data: &Vec<db::EsdCase>,
+    regexes: &Vec<(usize, Regex)>,
     db_conn: &Connection,
 ) -> Result<(), Error> {
     // println!("{}", path.display());
@@ -34,7 +36,7 @@ pub fn process_doc(
     };
 
     for rule in rules {
-        match rule.check(&document, path, data) {
+        match rule.check(&document, path, data, regexes) {
             Ok(result) => {
                 if result.is_match {
                     for m in result.matches {
