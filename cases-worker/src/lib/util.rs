@@ -34,7 +34,7 @@ pub fn normalize_filename(path: &PathBuf) -> String {
     format!("{:?}", path.file_name().unwrap()).replace("\"", "")
 }
 
-const KEYWORD_SEARCH_RADIUS: usize = 1000;
+const KEYWORD_SEARCH_RADIUS: usize = 500;
 
 pub fn find_keyword_in_radius(document: &Document, start: usize, end: usize) -> Option<String> {
     let text_l = document.full_text.len();
@@ -57,6 +57,9 @@ pub fn find_keyword_in_radius(document: &Document, start: usize, end: usize) -> 
         .collect::<String>();
 
     let found_keyword = KEYWORD_VARIANTS.iter().find(|&key| str_rad.contains(key));
+    // if found_keyword.is_some() {
+    //     println!("{}\n{}\n------", str_rad, found_keyword.unwrap());
+    // }
     found_keyword.map(|k| k.to_string())
 }
 
