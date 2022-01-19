@@ -127,27 +127,34 @@ pub fn clear_matches(db_conn: &Connection) -> Result<()> {
     db_conn.execute("DELETE FROM matches", [])?;
     Ok(())
 }
-#[test]
-fn test() {
-    let case = EsdCase {
-        id: 1,
-        code: "C-1/01".to_string(),
-        date: String::new(),
-        full_name: None,
-        short_name: String::new(),
-        related_cases: vec![
-            EsdRelatedCase {
-                id: 2,
-                code: String::from("C-2/01"),
-            },
-            EsdRelatedCase {
-                id: 3,
-                code: "C-3/01".to_string(),
-            },
-        ],
-    };
-    assert_eq!(
-        case.get_codes().map(|s| s.as_str()).collect_vec(),
-        vec!["C-1/01", "C-2/01", "C-3/01"]
-    );
+#[cfg(test)]
+mod tests {
+    use itertools::Itertools;
+
+    use crate::lib::db::{Code, EsdCase, EsdRelatedCase};
+
+    #[test]
+    fn test() {
+        let case = EsdCase {
+            id: 1,
+            code: "C-1/01".to_string(),
+            date: String::new(),
+            full_name: None,
+            short_name: String::new(),
+            related_cases: vec![
+                EsdRelatedCase {
+                    id: 2,
+                    code: String::from("C-2/01"),
+                },
+                EsdRelatedCase {
+                    id: 3,
+                    code: "C-3/01".to_string(),
+                },
+            ],
+        };
+        assert_eq!(
+            case.get_codes().map(|s| s.as_str()).collect_vec(),
+            vec!["C-1/01", "C-2/01", "C-3/01"]
+        );
+    }
 }

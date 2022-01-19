@@ -5,10 +5,11 @@ use regex::Regex;
 extern crate test;
 
 lazy_static! {
+    pub static ref SEARCH: String = String::from(" Wightman a další ");
     pub static ref INPUT: String = read_to_string("test_data.txt").unwrap();
-    pub static ref REG: Regex = Regex::new(r" Wightman a další ").unwrap();
+    pub static ref REG: Regex = Regex::new(format!(r"{:?}", SEARCH.as_str()).as_str()).unwrap();
     pub static ref REG_LOWER: Regex =
-        Regex::new(format!(r" Wightman a další ").to_lowercase().as_str()).unwrap();
+        Regex::new(format!(r"{}", SEARCH.as_str()).to_lowercase().as_str()).unwrap();
 }
 
 #[cfg(test)]
@@ -18,8 +19,7 @@ mod tests {
 
     #[bench]
     fn contains(b: &mut Bencher) {
-        let search = " Wightman a další ";
-        b.iter(|| INPUT.contains(search))
+        b.iter(|| INPUT.contains(SEARCH.as_str()))
     }
     #[bench]
     fn regex(b: &mut Bencher) {
@@ -35,7 +35,7 @@ mod tests {
     #[bench]
     fn contains_bytes(b: &mut Bencher) {
         let input = INPUT.to_lowercase();
-        let search = " Wightman a další ".to_lowercase();
+        let search = SEARCH.to_lowercase();
         b.iter(|| {
             input
                 .as_bytes()
