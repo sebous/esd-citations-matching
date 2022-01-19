@@ -61,7 +61,7 @@ fn process() -> Result<(), Error> {
 
     // process each file
     for path in fs::read_dir(SOURCE_DATA_DIR).unwrap().progress_with(pb)
-    // .take(1)
+    // .take(1000)
     {
         let pathbuf = path.unwrap().path();
         process::process_doc(&pathbuf, &worker_data)?;
