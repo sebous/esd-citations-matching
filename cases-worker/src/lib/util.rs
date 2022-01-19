@@ -1,7 +1,5 @@
 use std::path::PathBuf;
 
-use itertools::Itertools;
-
 use super::Document;
 
 const HYPHEN: char = '\u{2010}';

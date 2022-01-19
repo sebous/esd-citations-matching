@@ -1,12 +1,7 @@
 use std::path::PathBuf;
 
-use regex::Regex;
-
 use crate::{
-    lib::{
-        db::{EsdCase, Match},
-        Document, Error,
-    },
+    lib::{db::Match, Document, Error},
     rules::{full_code::FullCodeRule, short_name::ShortNameRule, NumCodeWithKey},
     WorkerData,
 };

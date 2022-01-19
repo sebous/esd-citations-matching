@@ -1,6 +1,5 @@
 use std::path::PathBuf;
 
-use ::regex::Regex;
 use itertools::Itertools;
 
 use crate::{

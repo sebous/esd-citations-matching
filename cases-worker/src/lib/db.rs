@@ -1,7 +1,6 @@
 use std::iter::once;
 
-use itertools::Itertools;
-use rusqlite::{params, types::Null, Connection, Result};
+use rusqlite::{params, Connection, Result};
 
 #[derive(Debug)]
 pub struct EsdCase {
