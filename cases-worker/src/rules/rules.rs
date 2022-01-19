@@ -8,6 +8,7 @@ use crate::{
         Document, Error,
     },
     rules::{full_code::FullCodeRule, short_name::ShortNameRule, NumCodeWithKey},
+    WorkerData,
 };
 
 pub struct RuleCheckResult {
@@ -20,8 +21,7 @@ pub trait Rule {
         &self,
         document: &Document,
         path: &PathBuf,
-        data: &Vec<EsdCase>,
-        regexes: &Vec<(usize, Regex)>,
+        worker_data: &WorkerData,
     ) -> Result<RuleCheckResult, Error>;
     fn get_name(&self) -> &'static str;
 }

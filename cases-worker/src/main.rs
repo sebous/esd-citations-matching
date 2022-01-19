@@ -1,6 +1,7 @@
 #![feature(test)]
 use std::fs;
 
+use ::regex::Regex;
 use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
 use initialize::init;
 use lib::{db, regex, Error};
@@ -20,6 +21,13 @@ fn main() {
     process().unwrap();
 }
 
+pub struct WorkerData {
+    db_conn: Connection,
+    rules: Vec<Box<dyn rules::Rule>>,
+    data: Vec<db::EsdCase>,
+    short_name_re: Vec<(usize, Regex)>,
+}
+
 const SOURCE_DATA_DIR: &str = "../source_data";
 
 fn process() -> Result<(), Error> {
@@ -28,11 +36,16 @@ fn process() -> Result<(), Error> {
     // get rules
     let rules = get_rules();
     // get db data
-    // TODO: handle db error
     let data = db::fetch_data(&db_conn).unwrap();
     // generate regexes from short_names
     let regexes = regex::generate_short_name_regexes(&data);
-    dbg!(&regexes.len());
+
+    let worker_data = WorkerData {
+        db_conn,
+        rules,
+        data,
+        short_name_re: regexes,
+    };
 
     // setup progress bar
     let total_count = fs::read_dir(SOURCE_DATA_DIR).unwrap().count();
@@ -44,14 +57,14 @@ fn process() -> Result<(), Error> {
     );
 
     // clear matches table
-    db::clear_matches(&db_conn).unwrap();
+    db::clear_matches(&worker_data.db_conn).unwrap();
 
     // process each file
     for path in fs::read_dir(SOURCE_DATA_DIR).unwrap().progress_with(pb)
     // .take(1)
     {
         let pathbuf = path.unwrap().path();
-        process::process_doc(&pathbuf, &rules, &data, &regexes, &db_conn)?;
+        process::process_doc(&pathbuf, &worker_data)?;
     }
 
     Ok(())

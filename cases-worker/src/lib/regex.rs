@@ -21,7 +21,7 @@ pub fn generate_short_name_regexes(data: &Vec<db::EsdCase>) -> Vec<(usize, Regex
         .map(|case| {
             (
                 case.id,
-                Regex::new(format!(r"{}", &case.short_name).as_str()).unwrap(),
+                Regex::new(format!(r" {} ", &case.short_name).as_str()).unwrap(),
             )
         })
         .collect_vec()

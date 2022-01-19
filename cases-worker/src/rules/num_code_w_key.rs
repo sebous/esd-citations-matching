@@ -3,9 +3,12 @@ use std::path::PathBuf;
 use ::regex::Regex;
 use itertools::Itertools;
 
-use crate::lib::{
-    db::{self, Code},
-    logger, regex, util, Document, Error,
+use crate::{
+    lib::{
+        db::{self, Code},
+        logger, regex, util, Document, Error,
+    },
+    WorkerData,
 };
 
 use super::rules::{self, Rule};
@@ -21,8 +24,7 @@ impl Rule for NumCodeWithKey {
         &self,
         document: &Document,
         path: &PathBuf,
-        data: &Vec<db::EsdCase>,
-        regexes: &Vec<(usize, Regex)>,
+        worker_data: &WorkerData,
     ) -> Result<super::RuleCheckResult, Error> {
         let match_found = regex::CODE.is_match(&document.full_text);
 
@@ -51,7 +53,10 @@ impl Rule for NumCodeWithKey {
         let mut matches = vec![];
 
         for code in &codes_found {
-            let found_case = data.iter().find(|case| case.get_codes().contains(code));
+            let found_case = worker_data
+                .data
+                .iter()
+                .find(|case| case.get_codes().contains(code));
             match found_case {
                 None => logger::rule_warning(
                     self.get_name(),
