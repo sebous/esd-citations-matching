@@ -15,13 +15,25 @@ lazy_static! {
         Regex::new(r"[\s\u202F\u00A0](\d{1,4}[/\--]\d{2})([\s\u202F\u00A0,.)]|$)").unwrap();
 }
 
-pub fn generate_short_name_regexes(data: &Vec<db::EsdCase>) -> Vec<(usize, Regex)> {
+pub fn gen_shname_regx(data: &Vec<db::EsdCase>) -> Vec<(usize, Regex)> {
     data.iter()
         .filter(|case| case.short_name.len() > 5)
         .map(|case| {
             (
                 case.id,
                 Regex::new(format!(r" {} ", &case.short_name).as_str()).unwrap(),
+            )
+        })
+        .collect_vec()
+}
+
+pub fn gen_fname_regx(data: &Vec<db::EsdCase>) -> Vec<(usize, Regex)> {
+    data.iter()
+        .filter(|case| case.full_name.is_some())
+        .map(|case| {
+            (
+                case.id,
+                Regex::new(format!(r" {} ", case.full_name.as_ref().unwrap()).as_str()).unwrap(),
             )
         })
         .collect_vec()

@@ -6,10 +6,6 @@ use super::RuleCheckResult;
 use crate::lib::{db, util, Document, Error};
 use crate::WorkerData;
 
-lazy_static! {
-    pub static ref TEST: Regex = Regex::new(r"oba zastoupeni").unwrap();
-}
-
 pub struct ShortNameRule {}
 impl Rule for ShortNameRule {
     fn get_name(&self) -> &'static str {
