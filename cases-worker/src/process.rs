@@ -1,6 +1,5 @@
 use std::{fs, path::PathBuf};
 
-use itertools::Itertools;
 use log::error;
 
 use crate::{
@@ -8,7 +7,7 @@ use crate::{
     WorkerData,
 };
 
-pub fn process_doc(path: &PathBuf, worker_data: &WorkerData) -> Result<(), Error> {
+pub fn process_doc(path: &PathBuf, worker_data: &WorkerData) -> Result<Vec<db::Match>, Error> {
     let file_content =
         fs::read_to_string(path).expect(format!("error reading file {}", path.display()).as_str());
 
@@ -20,10 +19,7 @@ pub fn process_doc(path: &PathBuf, worker_data: &WorkerData) -> Result<(), Error
         match rule.check(&document, path, worker_data) {
             Ok(result) => {
                 if result.is_match {
-                    for m in result.matches {
-                        db::save_match(m, &worker_data.db_conn).unwrap();
-                    }
-                    return Ok(());
+                    return Ok(result.matches);
                 }
             }
             Err(error) => {
@@ -32,5 +28,5 @@ pub fn process_doc(path: &PathBuf, worker_data: &WorkerData) -> Result<(), Error
         }
     }
 
-    Ok(())
+    Ok(vec![])
 }

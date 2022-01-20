@@ -2,10 +2,12 @@
 use std::fs;
 
 use ::regex::Regex;
-use indicatif::{ProgressBar, ProgressIterator, ProgressStyle};
+use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use initialize::init;
-use lib::{db, regex, Error};
-use rules::get_rules;
+use itertools::Itertools;
+use lib::{db, regex};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use rules::{get_rules, BoxedRule};
 use rusqlite::{Connection, Result};
 
 mod initialize;
@@ -22,16 +24,14 @@ fn main() {
 }
 
 pub struct WorkerData {
-    db_conn: Connection,
-    rules: Vec<Box<dyn rules::Rule>>,
+    rules: Vec<BoxedRule>,
     data: Vec<db::EsdCase>,
     short_name_re: Vec<(usize, Regex)>,
-    fname_re: Vec<(usize, Regex)>,
 }
 
 const SOURCE_DATA_DIR: &str = "../source_data";
 
-fn process() -> Result<(), Error> {
+fn process() -> Result<()> {
     // get db connection
     let db_conn = Connection::open("../db/db.sqlite").unwrap();
     // get rules
@@ -40,14 +40,12 @@ fn process() -> Result<(), Error> {
     let data = db::fetch_data(&db_conn).unwrap();
     // generate regexes from short_names
     let short_reg = regex::gen_shname_regx(&data);
-    let full_reg = regex::gen_fname_regx(&data);
+    // let full_reg = regex::gen_fname_regx(&data);
 
     let worker_data = WorkerData {
-        db_conn,
         rules,
         data,
         short_name_re: short_reg,
-        fname_re: full_reg,
     };
 
     // setup progress bar
@@ -60,15 +58,29 @@ fn process() -> Result<(), Error> {
     );
 
     // clear matches table
-    db::clear_matches(&worker_data.db_conn).unwrap();
+    db::clear_matches(&db_conn).unwrap();
 
-    // process each file
-    for path in fs::read_dir(SOURCE_DATA_DIR).unwrap().progress_with(pb)
-    // .take(1000)
-    {
-        let pathbuf = path.unwrap().path();
-        process::process_doc(&pathbuf, &worker_data)?;
-    }
+    let paths = fs::read_dir(SOURCE_DATA_DIR)
+        .unwrap()
+        .filter_map(|r| r.ok())
+        .collect_vec();
+
+    let matches = paths
+        .par_iter()
+        // .take(1000)
+        .progress_with(pb)
+        .map(|entry| {
+            let path = entry.path();
+            process::process_doc(&path, &worker_data)
+        })
+        .filter_map(|r| r.ok())
+        .flatten()
+        .collect::<Vec<db::Match>>();
+
+    // save matches to db
+    println!("saving {} matches to db..", matches.len());
+
+    db::save_matches(&matches, db_conn)?;
 
     Ok(())
 }

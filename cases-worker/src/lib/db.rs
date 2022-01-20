@@ -1,6 +1,6 @@
 use std::iter::once;
 
-use rusqlite::{params, Connection, Result};
+use rusqlite::{params, Connection, Result, Transaction};
 
 #[derive(Debug)]
 pub struct EsdCase {
@@ -104,6 +104,28 @@ pub fn fetch_data(db_conn: &Connection) -> Result<Vec<EsdCase>> {
             result
         });
     Ok(cases)
+}
+
+fn do_matches_batch(batch: &[Match], tx: &mut Transaction) -> Result<()> {
+    for m in batch {
+        tx.execute(
+            "
+        INSERT INTO matches (source_case, matched_case_id, matched_value, type)
+        VALUES (?1, ?2, ?3, ?4)
+        ",
+            params![m.source_case, m.matched_case_id, m.matched_value, m.m_type,],
+        )?;
+    }
+    Ok(())
+}
+
+pub fn save_matches(matches: &Vec<Match>, mut db_conn: Connection) -> Result<(), rusqlite::Error> {
+    for chunk in matches.chunks(1000) {
+        let mut tx = db_conn.transaction()?;
+        do_matches_batch(chunk, &mut tx)?;
+        tx.commit()?;
+    }
+    Ok(())
 }
 
 pub fn save_match(match_obj: Match, db_conn: &Connection) -> Result<()> {
