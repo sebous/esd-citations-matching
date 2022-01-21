@@ -21,7 +21,9 @@ pub trait Rule {
     fn get_name(&self) -> &'static str;
 }
 
-pub fn get_rules() -> Vec<Box<dyn Rule>> {
+pub type BoxedRule = Box<dyn Rule + Send + Sync>;
+
+pub fn get_rules() -> Vec<BoxedRule> {
     // rules have to be ordered by speed
     vec![
         Box::new(FullCodeRule {}),
