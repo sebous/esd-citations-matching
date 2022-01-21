@@ -21,7 +21,7 @@ impl Rule for ShortNameRule {
         let mut matches: Vec<db::Match> = vec![];
 
         for (id, re) in &worker_data.short_name_re {
-            if re.is_match(document.full_text.as_str()) {
+            if re.is_match(document.full_text_l.as_str()) {
                 matches.push(db::Match {
                     source_case: util::normalize_filename(path),
                     matched_case_id: id.to_owned(),

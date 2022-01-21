@@ -27,6 +27,7 @@ pub struct WorkerData {
     rules: Vec<BoxedRule>,
     data: Vec<db::EsdCase>,
     short_name_re: Vec<(usize, Regex)>,
+    full_name_re: Vec<(usize, Regex)>,
 }
 
 const SOURCE_DATA_DIR: &str = "../source_data";
@@ -40,12 +41,15 @@ fn process() -> Result<()> {
     let data = db::fetch_data(&db_conn).unwrap();
     // generate regexes from short_names
     let short_reg = regex::gen_shname_regx(&data);
-    // let full_reg = regex::gen_fname_regx(&data);
+    let full_reg = regex::gen_fname_regx(&data);
+
+    // dbg!(&full_reg);
 
     let worker_data = WorkerData {
         rules,
         data,
         short_name_re: short_reg,
+        full_name_re: full_reg,
     };
 
     // setup progress bar

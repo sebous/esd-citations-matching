@@ -71,7 +71,7 @@ pub fn check_if_t_code(document: &Document, start: usize) -> bool {
         return false;
     }
     if let Some(ch) = document.full_text.chars().nth(start - 2) {
-        return ch == 'T';
+        return ch == 't';
     }
     false
 }
