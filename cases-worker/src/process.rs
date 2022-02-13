@@ -11,10 +11,7 @@ pub fn process_doc(path: &PathBuf, worker_data: &WorkerData) -> Result<Vec<db::M
     let file_content =
         fs::read_to_string(path).expect(format!("error reading file {}", path.display()).as_str());
 
-    let document = Document {
-        full_text: file_content.clone(),
-        full_text_l: file_content.to_lowercase(),
-    };
+    let document = Document::create(&file_content);
 
     for rule in &worker_data.rules {
         match rule.check(&document, path, worker_data) {

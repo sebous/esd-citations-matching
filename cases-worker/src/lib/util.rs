@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use super::Document;
+use unidecode::unidecode;
 
 const HYPHEN: char = '\u{2010}';
 const NON_BREAK_HYPHEN: char = '\u{2011}';
@@ -11,7 +12,11 @@ const RETURN: char = '\n';
 const RETURN_WIN: char = '\r';
 
 lazy_static! {
-    static ref KEYWORD_VARIANTS: Vec<&'static str> = vec!["dvůr", "dvora", "dvoře", "dvorem"];
+    static ref KEYWORD_VARIANTS: Vec<String> =
+        vec!["dvůr", "dvora", "dvoře", "dvorem", "dvoru", "SDEU", "ESD"]
+            .iter()
+            .map(|str| unidecode(str))
+            .collect();
 }
 
 pub fn normalize_code(code: &str) -> String {
@@ -63,7 +68,7 @@ pub fn find_keyword_in_radius(
     //     println!("{}\n{}\n------", str_rad, found_keyword.unwrap());
     // }
 
-    found_keyword.and_then(|&k| Some((k.to_string(), str_rad.to_owned())))
+    found_keyword.and_then(|k| Some((k.to_string(), str_rad.to_owned())))
 }
 
 pub fn check_if_t_code(document: &Document, start: usize) -> bool {

@@ -21,7 +21,7 @@ pub fn gen_shname_regx(data: &Vec<db::EsdCase>) -> Vec<(usize, Regex)> {
     data.iter()
         .filter(|case| case.short_name.len() > 5)
         .flat_map(|case| {
-            let str = &case.short_name.to_lowercase();
+            let str = unidecode::unidecode(&case.short_name.to_lowercase());
             let mut res = vec![];
             res.push((case.id, Regex::new(format!(r" {} ", str).as_str()).unwrap()));
 
@@ -40,7 +40,8 @@ pub fn gen_fname_regx(data: &Vec<db::EsdCase>) -> Vec<(usize, Regex)> {
     data.iter()
         .filter(|case| case.full_name.is_some() && case.full_name.as_ref().unwrap().len() > 5)
         .flat_map(|case| {
-            let str = case.full_name.clone().unwrap().to_lowercase();
+            let full_name = case.full_name.clone().unwrap();
+            let str = unidecode::unidecode(&full_name.to_lowercase());
             let mut res = vec![];
             res.push((
                 case.id,

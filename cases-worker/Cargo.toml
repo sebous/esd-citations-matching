@@ -15,4 +15,5 @@ indicatif = {version = "0.16.2", features = ["rayon"]}
 chrono = "0.4.19"
 regex = "1.5.4"
 rayon = "1.5.1"
+unidecode = "0.3.0"
 

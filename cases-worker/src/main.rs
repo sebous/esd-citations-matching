@@ -6,6 +6,7 @@ use indicatif::{ParallelProgressIterator, ProgressBar, ProgressStyle};
 use initialize::init;
 use itertools::Itertools;
 use lib::{db, regex};
+use log::info;
 use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rules::{get_rules, BoxedRule};
 use rusqlite::{Connection, Result};
@@ -82,7 +83,7 @@ fn process() -> Result<()> {
         .collect::<Vec<db::Match>>();
 
     // save matches to db
-    println!("saving {} matches to db..", matches.len());
+    info!("saving {} matches to db..", matches.len());
 
     db::save_matches(&matches, db_conn)?;
 
