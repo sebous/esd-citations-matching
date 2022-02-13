@@ -1,5 +1,4 @@
 use itertools::Itertools;
-use regex::Regex;
 
 use super::Rule;
 use super::RuleCheckResult;
