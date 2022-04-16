@@ -44,8 +44,6 @@ fn process() -> Result<()> {
     let short_reg = regex::gen_shname_regx(&data);
     let full_reg = regex::gen_fname_regx(&data);
 
-    // dbg!(&full_reg);
-
     let worker_data = WorkerData {
         rules,
         data,
@@ -71,8 +69,10 @@ fn process() -> Result<()> {
         .collect_vec();
 
     let matches = paths
-        .par_iter()
+        // .iter()
         // .take(1000)
+        // .par_bridge()
+        .par_iter()
         .progress_with(pb)
         .map(|entry| {
             let path = entry.path();
