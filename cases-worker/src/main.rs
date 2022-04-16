@@ -27,8 +27,8 @@ fn main() {
 pub struct WorkerData {
     rules: Vec<BoxedRule>,
     data: Vec<db::EsdCase>,
-    short_name_re: Vec<(usize, Regex)>,
-    full_name_re: Vec<(usize, Regex)>,
+    short_name_reg: Vec<(usize, Regex)>,
+    full_name_reg: Vec<(usize, Regex)>,
 }
 
 const SOURCE_DATA_DIR: &str = "../source_data";
@@ -47,8 +47,8 @@ fn process() -> Result<()> {
     let worker_data = WorkerData {
         rules,
         data,
-        short_name_re: short_reg,
-        full_name_re: full_reg,
+        short_name_reg: short_reg,
+        full_name_reg: full_reg,
     };
 
     // setup progress bar

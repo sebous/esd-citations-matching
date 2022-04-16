@@ -23,7 +23,7 @@ impl Rule for FullNameRule {
         let mut matches: Vec<db::Match> = vec![];
         let text = document.full_text_l.as_str();
 
-        for (id, re) in &worker_data.full_name_re {
+        for (id, re) in &worker_data.full_name_reg {
             if re.is_match(text) {
                 matches.push(db::Match {
                     source_case: util::normalize_filename(path),

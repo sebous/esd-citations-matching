@@ -10,5 +10,7 @@
       "path": "../queries"
     }
   ],
-  "settings": {}
+  "settings": {
+    "workbench.colorTheme": "After Dark No Italics"
+  }
 }
