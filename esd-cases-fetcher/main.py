@@ -1,11 +1,11 @@
 from db import db
-from parse_csv_data import parse_csv_data
-from save_scraped_data import save_scraped_data
-from save_esd_scraped_data import save_esd_scraped_data
+import esd_scraped_data_saver
+import update_shortnames
+import source_cases_data_saver
 
+db.clear()
 db.init()
 
-save_esd_scraped_data()
-
-# save_scraped_data()
-# parse_csv_data()
+esd_scraped_data_saver.run()
+update_shortnames.run()
+source_cases_data_saver.run()

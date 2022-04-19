@@ -11,9 +11,10 @@ class BaseModel(peewee.Model):
 
 class SourceCases(BaseModel):
     id = peewee.AutoField()
-    code = peewee.CharField(unique=True)
+    code = peewee.CharField()
     date = peewee.DateField(null=True)
     file_name = peewee.CharField(unique=True)
+    court = peewee.CharField(null=True)
 
 
 class EsdCases(BaseModel):
@@ -45,5 +46,8 @@ models = [EsdCases, EsdCaseInfos, Matches, SourceCases]
 
 
 def init():
-    db.connect()
     db.create_tables(models)
+
+
+def clear():
+    db.drop_tables(models)
