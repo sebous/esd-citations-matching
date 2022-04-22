@@ -11,6 +11,8 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rules::{get_rules, BoxedRule};
 use rusqlite::{Connection, Result};
 
+use crate::lib::db::Code;
+
 mod initialize;
 mod lib;
 mod process;
@@ -27,6 +29,7 @@ fn main() {
 pub struct WorkerData {
     rules: Vec<BoxedRule>,
     data: Vec<db::EsdCase>,
+    source_data: Vec<db::SourceCase>,
     short_name_reg: Vec<(usize, Regex)>,
     full_name_reg: Vec<(usize, Regex)>,
 }
@@ -39,7 +42,7 @@ fn process() -> Result<()> {
     // get rules
     let rules = get_rules();
     // get db data
-    let data = db::fetch_data(&db_conn).unwrap();
+    let (data, source_data) = db::fetch_data(&db_conn).unwrap();
     // generate regexes from short_names
     let short_reg = regex::gen_shname_regx(&data);
     let full_reg = regex::gen_fname_regx(&data);
@@ -47,6 +50,7 @@ fn process() -> Result<()> {
     let worker_data = WorkerData {
         rules,
         data,
+        source_data,
         short_name_reg: short_reg,
         full_name_reg: full_reg,
     };
@@ -71,8 +75,8 @@ fn process() -> Result<()> {
     let matches = paths
         // .iter()
         // .take(1000)
-        // .par_bridge()
         .par_iter()
+        // .par_bridge()
         .progress_with(pb)
         .map(|entry| {
             let path = entry.path();

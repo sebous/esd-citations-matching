@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::{
     lib::{db::Match, Document, Error},
-    rules::{FullCodeRule, FullNameRule, NumCodeWithKey, ShortNameRule},
+    rules::{EcliCodeRule, FullCodeRule, FullNameRule, NumCodeWithKey, ShortNameRule},
     WorkerData,
 };
 
@@ -26,9 +26,10 @@ pub type BoxedRule = Box<dyn Rule + Send + Sync>;
 pub fn get_rules() -> Vec<BoxedRule> {
     // rules have to be ordered by speed
     vec![
+        Box::new(EcliCodeRule {}),
         Box::new(FullCodeRule {}),
         Box::new(ShortNameRule {}),
-        Box::new(FullNameRule {}),
+        // Box::new(FullNameRule {}),
         Box::new(NumCodeWithKey {}),
     ]
 }

@@ -36,8 +36,8 @@ class EsdCaseInfos(BaseModel):
 
 class Matches(BaseModel):
     id = peewee.AutoField()
-    source_case = peewee.ForeignKeyField(SourceCases, backref="matches")
-    matched_case = peewee.ForeignKeyField(EsdCases, backref="matches")
+    source_case_id = peewee.ForeignKeyField(SourceCases, backref="matches")
+    matched_case_id = peewee.ForeignKeyField(EsdCases, backref="matches")
     matched_value = peewee.CharField()
     type = peewee.CharField()
 

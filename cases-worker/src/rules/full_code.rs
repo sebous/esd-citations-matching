@@ -60,9 +60,14 @@ impl Rule for FullCodeRule {
                         None
                     }
                     Some(case) => Some(db::Match {
-                        source_case: util::normalize_filename(path),
+                        source_case_id: worker_data
+                            .source_data
+                            .iter()
+                            .find(|x| x.file_name == util::normalize_filename(path))
+                            .unwrap()
+                            .id,
                         matched_case_id: case.id,
-                        matched_value: case.code.to_owned(),
+                        matched_value: code.to_owned(),
                         m_type: self.get_name().to_string(),
                     }),
                 }

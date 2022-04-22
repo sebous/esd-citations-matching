@@ -64,7 +64,12 @@ impl Rule for NumCodeWithKey {
                     code,
                 ),
                 Some(case) => matches.push(db::Match {
-                    source_case: util::normalize_filename(path),
+                    source_case_id: worker_data
+                        .source_data
+                        .iter()
+                        .find(|x| x.file_name == util::normalize_filename(path))
+                        .unwrap()
+                        .id,
                     matched_case_id: case.id,
                     matched_value: code.to_owned(),
                     m_type: self.get_name().to_string(),
@@ -87,56 +92,3 @@ fn test() {
         dbg!(m);
     }
 }
-
-// impl Rule for NumCodeWithKey {
-//     fn get_name(&self) -> &'static str {
-//         "num_code_w_key"
-//     }
-
-//     fn check(
-//         &self,
-//         document: &Document,
-//         path: &PathBuf,
-//         data: &db::EsdCasesData,
-//     ) -> Result<rules::RuleCheckResult, Error> {
-//         let match_found = regex::CODE.is_match(&document.full_text);
-
-//         if !match_found {
-//             return Ok(rules::RuleCheckResult {
-//                 is_match: false,
-//                 message: None,
-//                 matches: vec![],
-//             });
-//         }
-
-//         let dvur_keyword_present = util::check_dvur_existence(document);
-
-//         if dvur_keyword_present.is_none() {
-//             return Ok(rules::RuleCheckResult {
-//                 is_match: false,
-//                 message: None,
-//                 matches: vec![],
-//             });
-//         }
-
-//         let cases = regex::CODE
-//             .captures_iter(&document.full_text)
-//             .filter(|c| !regex::T_CODE.is_match(&c[0]))
-//             .map(|c| util::normalize_code(&c[1]))
-//             .unique()
-//             .map(|c| db::Match {
-//                 source_case: util::normalize_filename(path),
-//                 matched_case_table: None,
-//                 matched_case_id: None,
-//                 matched_value: Some(c.to_owned()),
-//                 m_type: self.get_name().to_string(),
-//             })
-//             .collect_vec();
-
-//         Ok(rules::RuleCheckResult {
-//             is_match: true,
-//             matches: cases,
-//             message: None,
-//         })
-//     }
-// }

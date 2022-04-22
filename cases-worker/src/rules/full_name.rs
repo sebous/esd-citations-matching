@@ -26,15 +26,21 @@ impl Rule for FullNameRule {
         for (id, re) in &worker_data.full_name_reg {
             if re.is_match(text) {
                 matches.push(db::Match {
-                    source_case: util::normalize_filename(path),
+                    source_case_id: worker_data
+                        .source_data
+                        .iter()
+                        .find(|x| x.file_name == util::normalize_filename(path))
+                        .unwrap()
+                        .id,
                     matched_case_id: id.to_owned(),
                     matched_value: worker_data
                         .data
                         .iter()
                         .find(|c| c.id == *id)
                         .unwrap()
-                        .short_name
-                        .to_owned(),
+                        .full_name
+                        .to_owned()
+                        .unwrap(),
                     m_type: self.get_name().to_string(),
                 })
             }
