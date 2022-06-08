@@ -14,6 +14,10 @@ def map_row_code(row: Dict):
     row["case_id"] = util.normalize_esd_code(code_match.group())
     return row
 
+
+def get_value(val: str):
+    return val if val != "NA" else None
+
 # fn gets EsdCases and EsdCaseInfos from source csv
 # short_name and full_name are missing in this datasource
 
@@ -38,8 +42,13 @@ def run():
                 continue
             if row["ecli"] not in ecli_met:
                 ecli_met.add(row["ecli"])
-                esd_cases.append(
-                    {"ecli": row["ecli"], "date": row_date, "jr": row["jr"] if row["jr"] != "NA" else None, "cf": row["cf"] if row["cf"] != "NA" else None})
+                esd_cases.append({
+                    "ecli": row["ecli"],
+                    "date": row_date,
+                    "jr": get_value(row["jr"]),
+                    "cf": get_value(row["cf"]),
+                    "courtprocedure": get_value(row["courtprocedure"])
+                })
 
         with db.db.atomic():
             db.EsdCases.insert_many(esd_cases).execute()

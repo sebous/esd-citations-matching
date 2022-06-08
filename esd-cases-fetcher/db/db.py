@@ -1,4 +1,3 @@
-from enum import unique
 import peewee
 
 db = peewee.SqliteDatabase("../db/db.sqlite")
@@ -25,6 +24,7 @@ class EsdCases(BaseModel):
     date = peewee.DateField(null=True)
     jr = peewee.CharField(null=True)
     cf = peewee.CharField(null=True)
+    courtprocedure = peewee.CharField(null=True)
 
 
 class EsdCaseInfos(BaseModel):
