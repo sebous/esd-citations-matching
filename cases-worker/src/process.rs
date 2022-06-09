@@ -19,6 +19,9 @@ pub fn process_doc(path: &PathBuf, worker_data: &WorkerData) -> Result<Vec<db::M
             Ok(result) => {
                 if result.is_match {
                     matches.extend(result.matches);
+                    if !cfg!(feature = "allrules") {
+                        return Ok(matches);
+                    }
                 }
             }
             Err(error) => {

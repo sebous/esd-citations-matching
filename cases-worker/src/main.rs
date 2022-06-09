@@ -11,8 +11,6 @@ use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
 use rules::{get_rules, BoxedRule};
 use rusqlite::{Connection, Result};
 
-use crate::lib::db::Code;
-
 mod initialize;
 mod lib;
 mod process;

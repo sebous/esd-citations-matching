@@ -2,7 +2,7 @@ use std::path::PathBuf;
 
 use crate::{
     lib::{db::Match, Document, Error},
-    rules::{EcliCodeRule, FullCodeRule, FullNameRule, NumCodeWithKey, ShortNameRule},
+    rules::{EcliCodeRule, FullCodeRule, NumCodeWithKey, ShortNameRule},
     WorkerData,
 };
 
@@ -29,7 +29,6 @@ pub fn get_rules() -> Vec<BoxedRule> {
         Box::new(EcliCodeRule {}),
         Box::new(FullCodeRule {}),
         Box::new(ShortNameRule {}),
-        // Box::new(FullNameRule {}),
         Box::new(NumCodeWithKey {}),
     ]
 }
