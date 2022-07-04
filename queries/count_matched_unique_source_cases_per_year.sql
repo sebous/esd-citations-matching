@@ -15,9 +15,10 @@ FROM (
   LEFT JOIN (
     SELECT sourcecases.date as d,
       sourcecases.id
-    FROM matches
-      INNER JOIN sourcecases ON sourcecases.id = matches.source_case_id
+    FROM sourcecases
+      INNER JOIN matches ON sourcecases.id = matches.source_case_id
     WHERE d IS NOT NULL
+    GROUP BY sourcecases.id
   ) cases ON cases.d >= dates.d
   AND cases.d <= date(dates.d, '+1 year', '-1 day')
 GROUP BY year
