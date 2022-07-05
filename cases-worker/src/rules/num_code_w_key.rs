@@ -16,6 +16,20 @@ use super::rules::{self, Rule};
 
 pub struct NumCodeWithKey {}
 
+fn find_if_year_in_range(code: &str) -> bool {
+    let code = code.to_owned();
+    let year_str = code[code.len() - 2..].to_string();
+    match year_str.parse::<u32>() {
+        Ok(n) => {
+            if n <= 88 && n >= 50 {
+                return true;
+            }
+            return false;
+        }
+        Err(_) => return false,
+    }
+}
+
 impl Rule for NumCodeWithKey {
     fn get_name(&self) -> &'static str {
         "num_code_w_key"
@@ -61,6 +75,9 @@ impl Rule for NumCodeWithKey {
         let mut matches = vec![];
 
         for code in &codes_found {
+            if !find_if_year_in_range(&code) {
+                continue;
+            }
             let found_case = worker_data
                 .data
                 .iter()
