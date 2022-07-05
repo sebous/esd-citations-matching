@@ -22,6 +22,7 @@ pub struct EsdCase {
     pub ecli: String,
     pub short_name: Option<String>,
     pub full_name: Option<String>,
+    pub date: Option<String>,
     pub case_infos: Vec<EsdCaseInfo>,
 }
 
@@ -50,6 +51,7 @@ struct EsdJoinedCaseDbRow {
     pub ecli: String,
     pub short_name: Option<String>,
     pub full_name: Option<String>,
+    pub date: Option<String>,
     pub info_id: Option<usize>,
     pub info_code: Option<String>,
 }
@@ -58,7 +60,7 @@ pub fn fetch_data(db_conn: &Connection) -> Result<(Vec<EsdCase>, Vec<SourceCase>
     let mut esd_query = db_conn
         .prepare(
             "
-            SELECT C.id, C.ecli, C.short_name, C.full_name, I.id, I.code
+            SELECT C.id, C.ecli, C.short_name, C.full_name, C.date, I.id, I.code
             FROM esdcases C
             LEFT OUTER JOIN esdcaseinfos I ON C.id=I.case_id
             ORDER BY C.id
@@ -73,8 +75,9 @@ pub fn fetch_data(db_conn: &Connection) -> Result<(Vec<EsdCase>, Vec<SourceCase>
                 ecli: row.get(1).unwrap(),
                 short_name: row.get(2).unwrap_or(None),
                 full_name: row.get(3).unwrap_or(None),
-                info_id: row.get(4).unwrap(),
-                info_code: row.get(5).unwrap(),
+                date: row.get(4).unwrap_or(None),
+                info_id: row.get(5).unwrap(),
+                info_code: row.get(6).unwrap(),
             })
         })?
         .map(|r| r.unwrap())
@@ -98,6 +101,7 @@ pub fn fetch_data(db_conn: &Connection) -> Result<(Vec<EsdCase>, Vec<SourceCase>
                 ecli: row.ecli,
                 short_name: row.short_name,
                 full_name: row.full_name,
+                date: row.date,
                 case_infos: match row.info_id {
                     Some(info_id) => vec![EsdCaseInfo {
                         id: info_id,
@@ -191,6 +195,7 @@ mod tests {
             id: 1,
             ecli: String::new(),
             full_name: None,
+            date: None,
             short_name: None,
             case_infos: vec![
                 EsdCaseInfo {

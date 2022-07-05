@@ -12,7 +12,7 @@ const RETURN: char = '\n';
 const RETURN_WIN: char = '\r';
 
 lazy_static! {
-    static ref KEYWORD_VARIANTS: Vec<String> =
+    pub static ref KEYWORD_VARIANTS_DVUR: Vec<String> =
         vec!["dvůr", "dvora", "dvoře", "dvorem", "dvoru", "SDEU", "ESD"]
             .iter()
             .map(|str| unidecode(str))
@@ -37,21 +37,17 @@ pub fn normalize_filename(path: &PathBuf) -> String {
     format!("{:?}", path.file_name().unwrap()).replace("\"", "")
 }
 
-const KEYWORD_SEARCH_RADIUS: usize = 500;
-
 pub fn find_keyword_in_radius(
     document: &Document,
     start: usize,
     end: usize,
+    radius: usize,
+    keywords: Vec<String>,
 ) -> Option<(String, String)> {
     let text_l = document.full_text.len();
-    let start = if start > KEYWORD_SEARCH_RADIUS {
-        start - KEYWORD_SEARCH_RADIUS
-    } else {
-        0
-    };
-    let end = if end + KEYWORD_SEARCH_RADIUS < text_l {
-        end + KEYWORD_SEARCH_RADIUS
+    let start = if start > radius { start - radius } else { 0 };
+    let end = if end + radius < text_l {
+        end + radius
     } else {
         text_l
     };
@@ -63,10 +59,7 @@ pub fn find_keyword_in_radius(
         .take(end - start)
         .collect::<String>();
 
-    let found_keyword = KEYWORD_VARIANTS.iter().find(|&key| str_rad.contains(key));
-    // if found_keyword.is_some() {
-    //     println!("{}\n{}\n------", str_rad, found_keyword.unwrap());
-    // }
+    let found_keyword = keywords.iter().find(|&key| str_rad.contains(key));
 
     found_keyword.and_then(|k| Some((k.to_string(), str_rad.to_owned())))
 }

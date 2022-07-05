@@ -5,7 +5,9 @@ use itertools::Itertools;
 use crate::{
     lib::{
         db::{self, Code},
-        logger, regex, util, Document, Error,
+        logger, regex,
+        util::{self, KEYWORD_VARIANTS_DVUR},
+        Document, Error,
     },
     WorkerData,
 };
@@ -40,7 +42,14 @@ impl Rule for NumCodeWithKey {
             .captures_iter(&document.full_text)
             .filter(|c| match &c.get(1) {
                 Some(m) => {
-                    util::find_keyword_in_radius(document, m.start(), m.end()).is_some()
+                    util::find_keyword_in_radius(
+                        document,
+                        m.start(),
+                        m.end(),
+                        500,
+                        KEYWORD_VARIANTS_DVUR.to_vec(),
+                    )
+                    .is_some()
                         && !util::check_if_t_code(document, m.start())
                 }
                 None => false,

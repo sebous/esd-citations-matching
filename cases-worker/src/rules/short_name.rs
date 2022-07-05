@@ -20,7 +20,36 @@ impl Rule for ShortNameRule {
         let mut matches: Vec<db::Match> = vec![];
 
         for (id, re) in &worker_data.short_name_reg {
-            if re.is_match(document.full_text_l.as_str()) {
+            if re.is_match(&document.full_text_l.as_str()) {
+                let matched_case = worker_data.data.iter().find(|c| c.id == *id).unwrap();
+
+                let date = matched_case.date.clone();
+                if date.is_none() {
+                    continue;
+                }
+                let matched_year = date.unwrap()[..4].to_string();
+
+                let matched_short_name = re
+                    .captures_iter(&document.full_text_l)
+                    .filter(|c| match &c.get(0) {
+                        Some(m) => util::find_keyword_in_radius(
+                            &document,
+                            m.start(),
+                            m.end(),
+                            75,
+                            vec![matched_year.to_string()],
+                        )
+                        .is_some(),
+                        None => false,
+                    })
+                    .map(|c| c[0].to_string())
+                    .unique()
+                    .next();
+
+                if matched_short_name.is_none() {
+                    continue;
+                }
+
                 matches.push(db::Match {
                     source_case_id: worker_data
                         .source_data
@@ -29,14 +58,7 @@ impl Rule for ShortNameRule {
                         .unwrap()
                         .id,
                     matched_case_id: id.to_owned(),
-                    matched_value: worker_data
-                        .data
-                        .iter()
-                        .find(|c| c.id == *id)
-                        .unwrap()
-                        .short_name
-                        .to_owned()
-                        .unwrap(),
+                    matched_value: matched_case.short_name.to_owned().unwrap(),
                     m_type: self.get_name().to_string(),
                 });
             }

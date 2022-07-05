@@ -1,5 +1,6 @@
 use std::{fs, path::PathBuf};
 
+use itertools::Itertools;
 use log::error;
 
 use crate::{
@@ -30,5 +31,10 @@ pub fn process_doc(path: &PathBuf, worker_data: &WorkerData) -> Result<Vec<db::M
         }
     }
 
-    Ok(matches)
+    let unique_matches = matches
+        .into_iter()
+        .unique_by(|m| m.matched_case_id)
+        .collect_vec();
+
+    Ok(unique_matches)
 }
