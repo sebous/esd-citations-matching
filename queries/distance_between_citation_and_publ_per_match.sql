@@ -4,3 +4,5 @@ SELECT m.id as match_id,
 FROM matches m
   INNER JOIN sourcecases s ON s.id = m.source_case_id
   INNER JOIN esdcases e ON e.id = m.matched_case_id
+WHERE s.date IS NOT NULL
+  AND e.date IS NOT NULL
