@@ -16,4 +16,4 @@ main app written in Rust, handles searching for citations in source data by set 
 
 
 ## DB structure
-![](docs/img/db_schema.png)
+![](docs/img/db.png)
