@@ -1,13 +1,7 @@
-use std::path::PathBuf;
-
 use itertools::Itertools;
 
 use crate::{
-    lib::{
-        self,
-        db::{self, Code},
-        logger, util, Error,
-    },
+    common::{self, logger, util, Error},
     WorkerData,
 };
 
@@ -17,16 +11,15 @@ pub struct FullCodeRule {}
 
 impl Rule for FullCodeRule {
     fn get_name(&self) -> &'static str {
-        "full_code_c"
+        "full_code"
     }
 
     fn check(
         &self,
-        document: &lib::Document,
-        path: &PathBuf,
+        document: &common::Document,
         worker_data: &WorkerData,
     ) -> Result<rules::RuleCheckResult, Error> {
-        let match_found = lib::regex::C_CODE.is_match(document.full_text.as_str());
+        let match_found = common::regex::C_CODE.is_match(document.full_text.as_str());
 
         if !match_found {
             return Ok(rules::RuleCheckResult {
@@ -36,7 +29,7 @@ impl Rule for FullCodeRule {
             });
         }
 
-        let codes = lib::regex::C_CODE
+        let codes = common::regex::C_CODE
             .captures_iter(document.full_text.as_str())
             .map(|c| util::normalize_code(&c[1]))
             .unique()
@@ -46,34 +39,29 @@ impl Rule for FullCodeRule {
             .iter()
             .map(|code| {
                 let matched_case = worker_data
-                    .data
+                    .source_data
                     .iter()
-                    .find(|&case| case.get_codes().contains(code));
+                    .find(|&case| case.codes_list.contains(code));
                 match matched_case {
                     None => {
                         logger::rule_warning(
                             self.get_name(),
                             "found matching code that doesn't exist in db",
-                            path,
+                            &document.id,
                             code,
                         );
                         None
                     }
-                    Some(case) => Some(db::Match {
-                        source_case_id: worker_data
-                            .source_data
-                            .iter()
-                            .find(|x| x.file_name == util::normalize_filename(path))
-                            .unwrap()
-                            .id,
-                        matched_case_id: case.id,
-                        matched_value: code.to_owned(),
+                    Some(case) => Some(rules::Match {
+                        source_case_id: document.id.clone(),
+                        matched_case_code: case.code.clone(),
                         m_type: self.get_name().to_string(),
+                        match_context: None,
                     }),
                 }
             })
             .filter_map(|x| x)
-            .unique_by(|m| m.matched_case_id)
+            .unique_by(|m| m.matched_case_code.clone())
             .collect_vec();
 
         Ok(rules::RuleCheckResult {

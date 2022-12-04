@@ -1,22 +1,19 @@
-use std::{fs, path::PathBuf};
-
 use itertools::Itertools;
 use log::error;
 
 use crate::{
-    lib::{db, Document, Error},
+    common::{Document, Error},
+    csv_source::Case,
+    rules::Match,
     WorkerData,
 };
 
-pub fn process_doc(path: &PathBuf, worker_data: &WorkerData) -> Result<Vec<db::Match>, Error> {
-    let file_content =
-        fs::read_to_string(path).expect(format!("error reading file {}", path.display()).as_str());
-
-    let document = Document::create(&file_content);
+pub fn process_doc(entry: &Case, worker_data: &WorkerData) -> Result<Vec<Match>, Error> {
+    let document = Document::create(entry);
     let mut matches = vec![];
 
     for rule in &worker_data.rules {
-        match rule.check(&document, path, worker_data) {
+        match rule.check(&document, worker_data) {
             Ok(result) => {
                 if result.is_match {
                     matches.extend(result.matches);
@@ -33,7 +30,7 @@ pub fn process_doc(path: &PathBuf, worker_data: &WorkerData) -> Result<Vec<db::M
 
     let unique_matches = matches
         .into_iter()
-        .unique_by(|m| m.matched_case_id)
+        .unique_by(|m| m.matched_case_code.clone())
         .collect_vec();
 
     Ok(unique_matches)

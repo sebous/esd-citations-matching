@@ -17,7 +17,11 @@ class EsdSpider(scrapy.Spider):
             yield {
                 "code": row.css(".table_cell_aff::text").get().strip(),
                 "date": row.css(".table_cell_date::text").get().strip(),
-                "short_name": row.css(".table_cell_nom_usuel::text").get().strip()
+                "short_name": row.css(".table_cell_nom_usuel::text").get().strip(),
+                "metadata": {
+                    "a": 1,
+                    "b": 2,
+                }
             }
 
         last_page = int(response.css("div.pagination").re(r'(\d+) strany')[0])

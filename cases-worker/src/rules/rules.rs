@@ -1,10 +1,18 @@
-use std::path::PathBuf;
+use serde::Serialize;
 
 use crate::{
-    lib::{db::Match, Document, Error},
-    rules::{EcliCodeRule, FullCodeRule, NumCodeWithKey, ShortNameRule},
+    common::{Document, Error},
+    rules::{EcliCodeRule, FullCodeRule, NumCodeWithKey},
     WorkerData,
 };
+
+#[derive(Debug, Serialize)]
+pub struct Match {
+    pub source_case_id: String,
+    pub matched_case_code: String,
+    pub m_type: String,
+    pub match_context: Option<String>,
+}
 
 pub struct RuleCheckResult {
     pub message: Option<String>,
@@ -15,7 +23,6 @@ pub trait Rule {
     fn check(
         &self,
         document: &Document,
-        path: &PathBuf,
         worker_data: &WorkerData,
     ) -> Result<RuleCheckResult, Error>;
     fn get_name(&self) -> &'static str;
@@ -28,7 +35,7 @@ pub fn get_rules() -> Vec<BoxedRule> {
     vec![
         Box::new(EcliCodeRule {}),
         Box::new(FullCodeRule {}),
-        Box::new(ShortNameRule {}),
+        // Box::new(ShortNameRule {}),
         Box::new(NumCodeWithKey {}),
     ]
 }

@@ -5,9 +5,6 @@
     },
     {
       "path": "../db"
-    },
-    {
-      "path": "../data-loader"
     }
   ],
   "settings": {}
