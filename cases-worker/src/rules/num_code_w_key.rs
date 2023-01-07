@@ -1,32 +1,14 @@
-use itertools::Itertools;
-use rules::Match;
-
 use crate::{
-    common::{
-        logger, regex,
-        util::{self, KEYWORD_VARIANTS_DVUR},
-        Document, Error,
-    },
+    common::{self, logger, util, Document, Error},
     WorkerData,
 };
+use itertools::Itertools;
+use regex::Regex;
+use unidecode::unidecode;
 
 use super::rules::{self, Rule};
 
 pub struct NumCodeWithKey {}
-
-fn find_if_year_in_range(code: &str) -> bool {
-    let code = code.to_owned();
-    let year_str = code[code.len() - 2..].to_string();
-    match year_str.parse::<u32>() {
-        Ok(n) => {
-            if n <= 88 && n >= 50 {
-                return true;
-            }
-            return false;
-        }
-        Err(_) => return false,
-    }
-}
 
 impl Rule for NumCodeWithKey {
     fn get_name(&self) -> &'static str {
@@ -38,7 +20,7 @@ impl Rule for NumCodeWithKey {
         document: &Document,
         worker_data: &WorkerData,
     ) -> Result<super::RuleCheckResult, Error> {
-        let match_found = regex::CODE.is_match(&document.full_text);
+        let match_found = common::regex::CODE.is_match(&document.full_text);
 
         if !match_found {
             return Ok(rules::RuleCheckResult {
@@ -48,23 +30,20 @@ impl Rule for NumCodeWithKey {
             });
         }
 
-        let codes_found = regex::CODE
+        let codes_found = common::regex::CODE
             .captures_iter(&document.full_text)
-            .filter_map(|c| match &c.get(1) {
-                Some(m) => util::find_keyword_in_radius(
-                    document,
-                    m.start(),
-                    m.end(),
-                    300,
-                    KEYWORD_VARIANTS_DVUR.to_vec(),
-                )
-                .map(|(_, ctx)| {
-                    (
-                        format!("C-{}", util::normalize_code(&m.as_str().to_owned())),
-                        ctx,
-                    )
-                }),
-                None => None,
+            .filter_map(|c| {
+                c.get(1).and_then(|m| {
+                    if !check_forbidden_subrules_ok(&m, document) {
+                        return None;
+                    }
+                    check_keywords(&m, document).map(|str_ctx| {
+                        (
+                            format!("C-{}", util::normalize_code(&m.as_str().to_owned())),
+                            str_ctx,
+                        )
+                    })
+                })
             })
             .unique_by(|(str, _)| str.to_owned())
             .collect_vec();
@@ -72,9 +51,6 @@ impl Rule for NumCodeWithKey {
         let mut matches = vec![];
 
         for (code, radius) in &codes_found {
-            if !find_if_year_in_range(&code) {
-                continue;
-            }
             let found_case = worker_data
                 .source_data
                 .iter()
@@ -86,7 +62,7 @@ impl Rule for NumCodeWithKey {
                     &document.id,
                     code,
                 ),
-                Some(case) => matches.push(Match {
+                Some(case) => matches.push(rules::Match {
                     source_case_id: document.id.clone(),
                     matched_case_code: case.code.clone(),
                     m_type: self.get_name().to_string(),
@@ -103,10 +79,47 @@ impl Rule for NumCodeWithKey {
     }
 }
 
-#[test]
-fn test() {
-    for c in regex::CODE.captures_iter(" 123/22   aasdasd 222/23,") {
-        let m = &c.get(1).unwrap();
-        dbg!(m);
-    }
+lazy_static! {
+    static ref FORBIDDEN_KWS: Vec<&'static str> = vec!["smernic", "stiznost"];
+    static ref FORBIDDEN_DISTANT_KWS: Vec<&'static str> =
+        vec!["spolkovy", "spolkoveho", "narizeni"];
+    static ref KEYWORDS: Vec<Regex> =
+        vec!["dvůr", "dvora", "dvoře", "dvorem", "dvoru", "SDEU", "ESD"]
+            .iter()
+            .map(|str| Regex::new(&format!(
+                r"[^a-zA-Z\d]{}[^a-zA-Z\d]",
+                unidecode(str).to_lowercase()
+            ))
+            .unwrap())
+            .collect();
+}
+fn check_forbidden_subrules_ok(m: &regex::Match, document: &Document) -> bool {
+    let text_l = document.full_text_l.len();
+    let sbnu_found = document.full_text_l[m.end()..if (m.end() + 10) > text_l {
+        text_l
+    } else {
+        m.end() + 10
+    }]
+        .trim()
+        .starts_with("sbnu");
+
+    let us_found = document.full_text_l[if m.start() < 10 { 0 } else { m.start() - 10 }..m.start()]
+        .trim()
+        .ends_with("us");
+
+    let view = &document.full_text_l[if m.start() < 15 { 0 } else { m.start() - 15 }..m.start()];
+    let forbidden_kw_found = FORBIDDEN_KWS.iter().any(|key| view.contains(key));
+
+    let view = &document.full_text_l[if m.start() < 100 { 0 } else { m.start() - 100 }..m.start()];
+    let forbidden_dist_kws_found = FORBIDDEN_DISTANT_KWS.iter().any(|key| view.contains(key));
+
+    !sbnu_found && !us_found && !forbidden_kw_found && !forbidden_dist_kws_found
+}
+
+fn check_keywords(m: &regex::Match, document: &Document) -> Option<String> {
+    let view = util::extract_match_context(m, document);
+    KEYWORDS
+        .iter()
+        .any(|re| re.is_match(view))
+        .then_some(view.to_owned())
 }

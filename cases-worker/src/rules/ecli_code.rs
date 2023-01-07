@@ -3,7 +3,7 @@ use super::rules::{self, Match, Rule};
 use itertools::Itertools;
 
 use crate::{
-    common::{self, logger, Error},
+    common::{self, logger, util, Error},
     WorkerData,
 };
 
@@ -31,13 +31,16 @@ impl Rule for EcliCodeRule {
 
         let codes = common::regex::ECLI_CODE
             .captures_iter(document.full_text_l.as_str())
-            .map(|c| c[0].to_owned())
+            .filter_map(|c| {
+                c.get(0)
+                    .and_then(|m| Some((m.as_str(), util::extract_match_context(&m, document))))
+            })
             .unique()
             .collect_vec();
 
         let matches = codes
             .iter()
-            .map(|ecli| {
+            .map(|(ecli, str_ctx)| {
                 let ecli_upper = ecli.to_uppercase();
                 let matched_case = worker_data
                     .source_data
@@ -58,7 +61,7 @@ impl Rule for EcliCodeRule {
                         matched_case_code: case.code.clone(),
                         source_case_id: document.id.clone(),
                         m_type: self.get_name().to_string(),
-                        match_context: None,
+                        match_context: Some(str_ctx.to_string()),
                     }),
                 }
             })
