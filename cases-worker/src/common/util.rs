@@ -37,33 +37,6 @@ pub fn normalize_filename(path: &PathBuf) -> String {
     format!("{:?}", path.file_name().unwrap()).replace("\"", "")
 }
 
-pub fn find_keyword_in_radius(
-    document: &Document,
-    start: usize,
-    end: usize,
-    radius: usize,
-    keywords: Vec<String>,
-) -> Option<(String, String)> {
-    let text_l = document.full_text.len();
-    let start = if start > radius { start - radius } else { 0 };
-    let end = if end + radius < text_l {
-        end + radius
-    } else {
-        text_l
-    };
-
-    let str_rad = &document
-        .full_text_l
-        .chars()
-        .skip(start)
-        .take(end - start)
-        .collect::<String>();
-
-    let found_keyword = keywords.iter().find(|&key| str_rad.contains(key));
-
-    found_keyword.and_then(|k| Some((k.to_string(), str_rad.to_owned())))
-}
-
 pub fn check_if_t_code(document: &Document, start: usize) -> bool {
     if start < 2 {
         return false;
@@ -72,4 +45,21 @@ pub fn check_if_t_code(document: &Document, start: usize) -> bool {
         return ch == 't';
     }
     false
+}
+
+const RADIUS_KW: usize = 150;
+
+pub fn extract_match_context<'a>(m: &regex::Match, document: &'a Document) -> &'a str {
+    let text_l = document.full_text_l.len();
+    let start = if m.start() > RADIUS_KW {
+        m.start() - RADIUS_KW
+    } else {
+        0
+    };
+    let end = if m.end() + RADIUS_KW < text_l {
+        m.end() + RADIUS_KW
+    } else {
+        text_l
+    };
+    &document.full_text_l[start..end]
 }

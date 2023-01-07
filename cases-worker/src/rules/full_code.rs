@@ -31,13 +31,20 @@ impl Rule for FullCodeRule {
 
         let codes = common::regex::C_CODE
             .captures_iter(document.full_text.as_str())
-            .map(|c| util::normalize_code(&c[1]))
+            .filter_map(|c| {
+                c.get(1).and_then(|m| {
+                    Some((
+                        util::normalize_code(m.as_str()),
+                        util::extract_match_context(&m, document),
+                    ))
+                })
+            })
             .unique()
             .collect_vec();
 
         let matches = codes
             .iter()
-            .map(|code| {
+            .map(|(code, str_ctx)| {
                 let matched_case = worker_data
                     .source_data
                     .iter()
@@ -56,7 +63,7 @@ impl Rule for FullCodeRule {
                         source_case_id: document.id.clone(),
                         matched_case_code: case.code.clone(),
                         m_type: self.get_name().to_string(),
-                        match_context: None,
+                        match_context: Some(str_ctx.to_string()),
                     }),
                 }
             })
