@@ -47,8 +47,8 @@ pub struct Case {
 }
 #[derive(Deserialize)]
 struct UsCsvLine {
-    rozhodnuti_texts: String,
-    spisova_znacka: String,
+    texts: String,
+    doc_id: String,
 }
 
 pub fn load_us_cases() -> Result<Vec<Case>, Box<dyn Error>> {
@@ -58,8 +58,8 @@ pub fn load_us_cases() -> Result<Vec<Case>, Box<dyn Error>> {
     for line in reader.deserialize() {
         let line: UsCsvLine = line?;
         data.push(Case {
-            text: line.rozhodnuti_texts,
-            id: line.spisova_znacka,
+            text: line.texts,
+            id: line.doc_id,
         });
     }
 
