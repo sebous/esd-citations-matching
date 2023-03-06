@@ -19,6 +19,7 @@
 ## num code (with additional params)
 
 - matches regex `[\s\u202F\u00A0](\d{1,4}[/\u2010\u2011\u2012\u2013\u2014\u2212\u002D]\d{2})([\s\u202F\u00A0,.)]|$)`
+- text from `(start - 150)` to `(end + 150)` must contain any of `["dvůr", "dvora", "dvoře", "dvorem", "dvoru", "SDEU", "ESD"]`
 
 - every rule below must be false:
   - text from `end` to `(end + 10)` must start with `"sbnu"`
